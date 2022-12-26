@@ -6,13 +6,14 @@ CREATE TABLE `users`
     `username`      VARCHAR(40)  NOT NULL UNIQUE,
     `password_hash` CHAR(60)     NOT NULL,
     `email`         VARCHAR(254) NOT NULL UNIQUE,
-    `created_at`    TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP
+    `created_at`    TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TABLE `roles`
 (
-    `id`   INT PRIMARY KEY AUTO_INCREMENT,
-    `role` ENUM ('USER', 'ADMIN') NOT NULL UNIQUE
+    `id`         INT PRIMARY KEY AUTO_INCREMENT,
+    `role`       ENUM ('USER', 'ADMIN') NOT NULL UNIQUE,
+    `created_at` TIMESTAMP(3)           NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TABLE `users_roles`

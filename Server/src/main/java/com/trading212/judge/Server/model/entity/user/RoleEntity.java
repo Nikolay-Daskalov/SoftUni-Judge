@@ -1,19 +1,17 @@
 package com.trading212.judge.Server.model.entity.user;
 
+import com.trading212.judge.Server.model.entity.base.BaseEntity;
 import com.trading212.judge.Server.model.entity.user.enums.RoleEnum;
 
-public class RoleEntity {
+import java.time.LocalDateTime;
 
-    private final Integer id;
+public class RoleEntity extends BaseEntity {
+
     private final RoleEnum role;
 
-    public RoleEntity(Integer id, String role) {
-        this.id = id;
-        this.role = RoleEnum.valueOf(role);
-    }
-
-    public Integer getId() {
-        return id;
+    public RoleEntity(Integer id, RoleEnum role, LocalDateTime createdAt) {
+        super(id, createdAt);
+        this.role = role;
     }
 
     public RoleEnum getRole() {

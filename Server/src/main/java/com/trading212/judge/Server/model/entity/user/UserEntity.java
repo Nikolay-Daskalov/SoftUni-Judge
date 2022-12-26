@@ -1,22 +1,19 @@
 package com.trading212.judge.Server.model.entity.user;
 
+import com.trading212.judge.Server.model.entity.base.BaseEntity;
+
 import java.time.LocalDateTime;
 import java.util.Set;
 
-public class UserEntity {
+public class UserEntity extends BaseEntity {
 
-    private Integer id;
     private String username;
     private String passwordHash;
     private String email;
-    private LocalDateTime createdAt;
     private Set<RoleEntity> roles;
 
     public UserEntity() {
-    }
-
-    public Integer getId() {
-        return id;
+        super(null, null);
     }
 
     public String getUsername() {
@@ -29,10 +26,6 @@ public class UserEntity {
 
     public String getEmail() {
         return email;
-    }
-
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
     }
 
     public Set<RoleEntity> getRoles() {

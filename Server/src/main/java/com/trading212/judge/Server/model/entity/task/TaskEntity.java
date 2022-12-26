@@ -1,20 +1,18 @@
 package com.trading212.judge.Server.model.entity.task;
 
+import com.trading212.judge.Server.model.entity.base.BaseEntity;
+
 import java.time.LocalDateTime;
+import java.util.Objects;
 
-public class TaskEntity {
+public class TaskEntity extends BaseEntity {
 
-    private Integer id;
     private String name;
     private DescriptionEntity description;
     private String answerURL;
-    private LocalDateTime createdAt;
 
     public TaskEntity() {
-    }
-
-    public Integer getId() {
-        return id;
+        super(null, null);
     }
 
     public String getName() {
@@ -29,8 +27,17 @@ public class TaskEntity {
         return description;
     }
 
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        TaskEntity that = (TaskEntity) o;
+        return id.equals(that.id) && name.equals(that.name) && description.equals(that.description) && answerURL.equals(that.answerURL);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, name, description, answerURL);
     }
 
     public static class Builder {

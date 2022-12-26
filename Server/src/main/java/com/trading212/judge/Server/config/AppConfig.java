@@ -11,13 +11,5 @@ import javax.sql.DataSource;
 @Configuration
 public class AppConfig {
 
-    @Bean
-    public JdbcTemplate jdbcTemplate(DataSource dataSource) {
-        return new JdbcTemplate(dataSource);
-    }
-
-    @Bean
-    public TransactionTemplate transactionTemplate(PlatformTransactionManager platformTransactionManager) {
-        return new TransactionTemplate(platformTransactionManager);
-    }
+    //TODO: Add something or remove it
 }

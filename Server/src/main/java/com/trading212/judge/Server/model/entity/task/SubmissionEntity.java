@@ -1,11 +1,14 @@
 package com.trading212.judge.Server.model.entity.task;
 
+import com.trading212.judge.Server.model.entity.base.BaseEntity;
 import com.trading212.judge.Server.model.entity.task.enums.SubmissionResultEnum;
 import com.trading212.judge.Server.model.entity.user.UserEntity;
 
-public class SubmissionEntity {
+import java.time.LocalDateTime;
+import java.util.Objects;
 
-    private Integer id;
+public class SubmissionEntity extends BaseEntity {
+
     private TaskEntity task;
     private UserEntity user;
     private SubmissionResultEnum result;
@@ -13,10 +16,7 @@ public class SubmissionEntity {
     private Double executionTime;
 
     public SubmissionEntity() {
-    }
-
-    public Integer getId() {
-        return id;
+        super(null, null);
     }
 
     public TaskEntity getTask() {
@@ -37,6 +37,19 @@ public class SubmissionEntity {
 
     public Double getExecutionTime() {
         return executionTime;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        SubmissionEntity that = (SubmissionEntity) o;
+        return id.equals(that.id) && task.equals(that.task) && user.equals(that.user) && result == that.result && category.equals(that.category) && Objects.equals(executionTime, that.executionTime);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, task, user, result, category, executionTime);
     }
 
     public static class Builder {
@@ -73,6 +86,11 @@ public class SubmissionEntity {
 
         public Builder setExecutionTime(Double executionTime) {
             submission.executionTime = executionTime;
+            return this;
+        }
+
+        public Builder setCreatedAt(LocalDateTime createdAt) {
+            submission.createdAt = createdAt;
             return this;
         }
 

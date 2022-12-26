@@ -1,37 +1,33 @@
 package com.trading212.judge.Server.model.entity.task;
 
+import com.trading212.judge.Server.model.entity.base.BaseEntity;
+
 import java.time.LocalDateTime;
+import java.util.Objects;
 
-public class DescriptionEntity {
+public class DescriptionEntity extends BaseEntity {
 
-    private Integer id;
-    private String url;
-    private LocalDateTime createdAt;
+    private final String url;
 
-    public DescriptionEntity() {
-    }
-
-    public Integer getId() {
-        return id;
-    }
-
-    public void setId(Integer id) {
-        this.id = id;
+    public DescriptionEntity(Integer id, LocalDateTime createdAt, String url) {
+        super(id, createdAt);
+        this.url = url;
     }
 
     public String getUrl() {
         return url;
     }
 
-    public void setUrl(String url) {
-        this.url = url;
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        DescriptionEntity that = (DescriptionEntity) o;
+        return id.equals(that.id) && url.equals(that.url);
     }
 
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
-    }
-
-    public void setCreatedAt(LocalDateTime createdAt) {
-        this.createdAt = createdAt;
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, url);
     }
 }
