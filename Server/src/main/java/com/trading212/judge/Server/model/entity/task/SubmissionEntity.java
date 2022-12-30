@@ -9,10 +9,12 @@ import java.util.Objects;
 
 public class SubmissionEntity extends BaseEntity {
 
+    public static final String TABLE_NAME = "submissions";
+
     private TaskEntity task;
     private UserEntity user;
     private SubmissionResultEnum result;
-    private LanguageCategoryEntity category;
+    private LanguageEntity category;
     private Double executionTime;
 
     public SubmissionEntity() {
@@ -31,7 +33,7 @@ public class SubmissionEntity extends BaseEntity {
         return result;
     }
 
-    public LanguageCategoryEntity getCategory() {
+    public LanguageEntity getCategory() {
         return category;
     }
 
@@ -79,7 +81,7 @@ public class SubmissionEntity extends BaseEntity {
             return this;
         }
 
-        public Builder setCategory(LanguageCategoryEntity category) {
+        public Builder setCategory(LanguageEntity category) {
             submission.category = category;
             return this;
         }

@@ -3,9 +3,12 @@ package com.trading212.judge.Server.model.entity.user;
 import com.trading212.judge.Server.model.entity.base.BaseEntity;
 
 import java.time.LocalDateTime;
+import java.util.Objects;
 import java.util.Set;
 
 public class UserEntity extends BaseEntity {
+
+    public static final String TABLE_NAME = "users";
 
     private String username;
     private String passwordHash;
@@ -30,6 +33,19 @@ public class UserEntity extends BaseEntity {
 
     public Set<RoleEntity> getRoles() {
         return roles;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        UserEntity that = (UserEntity) o;
+        return id.equals(that.id) && username.equals(that.username) && passwordHash.equals(that.passwordHash) && email.equals(that.email) && roles.equals(that.roles);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, username, passwordHash, email, roles);
     }
 
     public static class Builder {

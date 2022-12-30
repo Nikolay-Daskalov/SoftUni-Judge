@@ -7,9 +7,11 @@ import java.util.Objects;
 
 public class TaskEntity extends BaseEntity {
 
+    public static final String TABLE_NAME = "tasks";
+
     private String name;
-    private DescriptionEntity description;
-    private String answerURL;
+    private DocumentEntity description;
+    private String answersURL;
 
     public TaskEntity() {
         super(null, null);
@@ -19,11 +21,11 @@ public class TaskEntity extends BaseEntity {
         return name;
     }
 
-    public String getAnswerURL() {
-        return answerURL;
+    public String getAnswersURL() {
+        return answersURL;
     }
 
-    public DescriptionEntity getDescription() {
+    public DocumentEntity getDescription() {
         return description;
     }
 
@@ -32,12 +34,12 @@ public class TaskEntity extends BaseEntity {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         TaskEntity that = (TaskEntity) o;
-        return id.equals(that.id) && name.equals(that.name) && description.equals(that.description) && answerURL.equals(that.answerURL);
+        return id.equals(that.id) && name.equals(that.name) && description.equals(that.description) && answersURL.equals(that.answersURL);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, name, description, answerURL);
+        return Objects.hash(id, name, description, answersURL);
     }
 
     public static class Builder {
@@ -57,13 +59,13 @@ public class TaskEntity extends BaseEntity {
             return this;
         }
 
-        public Builder setDescription(DescriptionEntity description) {
+        public Builder setDescription(DocumentEntity description) {
             task.description = description;
             return this;
         }
 
-        public Builder setAnswerURL(String answerURL) {
-            task.answerURL = answerURL;
+        public Builder setAnswersURL(String answersURL) {
+            task.answersURL = answersURL;
             return this;
         }
 
@@ -74,6 +76,14 @@ public class TaskEntity extends BaseEntity {
 
         public TaskEntity build() {
             return task;
+        }
+
+        public void reset() {
+            task.id = null;
+            task.name = null;
+            task.description = null;
+            task.answersURL = null;
+            task.createdAt = null;
         }
     }
 }
