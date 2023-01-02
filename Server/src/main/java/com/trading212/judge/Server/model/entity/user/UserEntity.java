@@ -2,7 +2,7 @@ package com.trading212.judge.Server.model.entity.user;
 
 import com.trading212.judge.Server.model.entity.base.BaseEntity;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.Objects;
 import java.util.Set;
 
@@ -75,7 +75,7 @@ public class UserEntity extends BaseEntity {
             return this;
         }
 
-        public Builder setCreatedAt(LocalDateTime createdAt) {
+        public Builder setCreatedAt(Instant createdAt) {
             user.createdAt = createdAt;
             return this;
         }

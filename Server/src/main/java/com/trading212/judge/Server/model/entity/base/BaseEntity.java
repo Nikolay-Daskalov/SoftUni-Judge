@@ -1,12 +1,12 @@
 package com.trading212.judge.Server.model.entity.base;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 public abstract class BaseEntity {
     protected Integer id;
-    protected LocalDateTime createdAt;
+    protected Instant createdAt;
 
-    protected BaseEntity(Integer id, LocalDateTime createdAt) {
+    protected BaseEntity(Integer id, Instant createdAt) {
         this.id = id;
         this.createdAt = createdAt;
     }
@@ -15,7 +15,7 @@ public abstract class BaseEntity {
         return id;
     }
 
-    public LocalDateTime getCreatedAt() {
+    public Instant getCreatedAt() {
         return createdAt;
     }
 }

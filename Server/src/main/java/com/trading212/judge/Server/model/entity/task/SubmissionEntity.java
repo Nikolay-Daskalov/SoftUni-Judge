@@ -4,7 +4,7 @@ import com.trading212.judge.Server.model.entity.base.BaseEntity;
 import com.trading212.judge.Server.model.entity.task.enums.SubmissionResultEnum;
 import com.trading212.judge.Server.model.entity.user.UserEntity;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.Objects;
 
 public class SubmissionEntity extends BaseEntity {
@@ -91,7 +91,7 @@ public class SubmissionEntity extends BaseEntity {
             return this;
         }
 
-        public Builder setCreatedAt(LocalDateTime createdAt) {
+        public Builder setCreatedAt(Instant createdAt) {
             submission.createdAt = createdAt;
             return this;
         }

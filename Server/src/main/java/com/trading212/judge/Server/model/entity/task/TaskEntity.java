@@ -2,7 +2,7 @@ package com.trading212.judge.Server.model.entity.task;
 
 import com.trading212.judge.Server.model.entity.base.BaseEntity;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.Objects;
 
 public class TaskEntity extends BaseEntity {
@@ -69,7 +69,7 @@ public class TaskEntity extends BaseEntity {
             return this;
         }
 
-        public Builder setCreatedAt(LocalDateTime createdAt) {
+        public Builder setCreatedAt(Instant createdAt) {
             task.createdAt = createdAt;
             return this;
         }

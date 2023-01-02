@@ -2,17 +2,22 @@ package com.trading212.judge.Server.model.entity.task;
 
 import com.trading212.judge.Server.model.entity.base.BaseEntity;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.Objects;
 
 public class DocumentEntity extends BaseEntity {
 
     public static final String TABLE_NAME = "documents";
 
+    private String name;
     private String url;
 
     public DocumentEntity() {
         super(null, null);
+    }
+
+    public String getName() {
+        return name;
     }
 
     public String getUrl() {
@@ -33,35 +38,41 @@ public class DocumentEntity extends BaseEntity {
     }
 
     public static class Builder {
-        private final DocumentEntity description;
+        private final DocumentEntity document;
 
         public Builder() {
-            description = new DocumentEntity();
+            document = new DocumentEntity();
         }
 
         public Builder setId(Integer id) {
-            description.id = id;
+            document.id = id;
+            return this;
+        }
+
+        public Builder setName(String name) {
+            document.name = name;
             return this;
         }
 
         public Builder setURL(String url) {
-            description.url = url;
+            document.url = url;
             return this;
         }
 
-        public Builder setCreatedAt(LocalDateTime createdAt) {
-            description.createdAt = createdAt;
+        public Builder setCreatedAt(Instant createdAt) {
+            document.createdAt = createdAt;
             return this;
         }
 
         public DocumentEntity build() {
-            return description;
+            return document;
         }
 
         public void reset() {
-            description.id = null;
-            description.url = null;
-            description.createdAt = null;
+            document.id = null;
+            document.name = null;
+            document.url = null;
+            document.createdAt = null;
         }
     }
 }

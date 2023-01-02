@@ -3,7 +3,7 @@ package com.trading212.judge.Server.model.entity.task;
 import com.trading212.judge.Server.model.entity.base.BaseEntity;
 import com.trading212.judge.Server.model.entity.task.enums.TaskCategoryEnum;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.Objects;
 
 public class LanguageEntity extends BaseEntity {
@@ -12,7 +12,7 @@ public class LanguageEntity extends BaseEntity {
 
     private final TaskCategoryEnum taskCategory;
 
-    public LanguageEntity(Integer id, LocalDateTime createdAt, TaskCategoryEnum taskCategory) {
+    public LanguageEntity(Integer id, Instant createdAt, TaskCategoryEnum taskCategory) {
         super(id, createdAt);
         this.taskCategory = taskCategory;
     }

@@ -28,17 +28,12 @@ public class MariaDBUserRepositoryImpl implements UserRepository {
 
         Set<String> roles = new HashSet<>();
 
-        AtomicBoolean isFound = new AtomicBoolean(true);
+        AtomicBoolean isFound = new AtomicBoolean(false);
 
         jdbcTemplate.query(Queries.FIND_BY_USERNAME_FOR_AUTHENTICATION, rs -> {
-            int rowNumber = rs.getRow();
+            if (rs.isFirst()) {
+                isFound.set(true);
 
-            if (rowNumber == 0) {
-                isFound.set(false);
-                return;
-            }
-
-            if (rowNumber == 1) {
                 userAuthModel.setUsername(rs.getString(1));
                 userAuthModel.setPasswordHash(rs.getString(2));
 

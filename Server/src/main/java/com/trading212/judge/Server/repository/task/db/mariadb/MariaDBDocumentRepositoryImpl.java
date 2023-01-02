@@ -6,7 +6,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.support.TransactionTemplate;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
@@ -31,7 +31,7 @@ public class MariaDBDocumentRepositoryImpl implements DocumentRepository {
         jdbcTemplate.query(Queries.GET_ALL, rs -> {
             int id = rs.getInt(1);
             String url = rs.getString(2);
-            LocalDateTime createdAt = rs.getTimestamp(3).toLocalDateTime();
+            Instant createdAt = rs.getTimestamp(3).toInstant();
 
             builder
                     .setId(id)

@@ -15,7 +15,7 @@ import java.util.stream.Collectors;
 @Service
 public class UserService implements UserDetailsService {
 
-    private static final String ROLE_PREFIX = "ROLE_";
+    public static final String ROLE_PREFIX = "ROLE_";
 
     private final UserRepository userRepository;
 
@@ -33,7 +33,7 @@ public class UserService implements UserDetailsService {
     private User mapUserEntityToUser(UserAuthModel userAuthModel) {
         Set<SimpleGrantedAuthority> roles = userAuthModel.getRoles()
                 .stream()
-                .map(role -> new SimpleGrantedAuthority(ROLE_PREFIX + role))
+                .map(SimpleGrantedAuthority::new)
                 .collect(Collectors.toSet());
 
         return new User(
