@@ -1,7 +1,7 @@
 package com.trading212.judge.service.user;
 
 import com.trading212.judge.model.auth.UserAuthModel;
-import com.trading212.judge.repository.user.UserRepository;
+import com.trading212.judge.repository.user.UserAuthenticationRepository;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -15,15 +15,15 @@ import java.util.stream.Collectors;
 @Service
 public class UserDetailsServiceImpl implements UserDetailsService {
 
-    private final UserRepository userRepository;
+    private final UserAuthenticationRepository userAuthenticationRepository;
 
-    public UserDetailsServiceImpl(UserRepository userRepository) {
-        this.userRepository = userRepository;
+    public UserDetailsServiceImpl(UserAuthenticationRepository userAuthenticationRepository) {
+        this.userAuthenticationRepository = userAuthenticationRepository;
     }
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        UserAuthModel userAuthModel = userRepository.findByUsernameForAuthentication(username).orElseThrow(() -> new UsernameNotFoundException("Username not found!"));
+        UserAuthModel userAuthModel = userAuthenticationRepository.findByUsername(username).orElseThrow(() -> new UsernameNotFoundException("Username not found!"));
 
         return mapUserEntityToUser(userAuthModel);
     }

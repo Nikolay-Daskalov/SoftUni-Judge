@@ -1,62 +1,93 @@
 package com.trading212.judge.repository.user.db.mariadb;
 
-import com.trading212.judge.model.auth.UserAuthModel;
+import com.trading212.judge.model.dto.UserDTO;
+import com.trading212.judge.model.entity.user.UserEntity;
 import com.trading212.judge.repository.user.UserRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.PreparedStatementCreator;
+import org.springframework.jdbc.support.GeneratedKeyHolder;
+import org.springframework.jdbc.support.KeyHolder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.TransactionException;
+import org.springframework.transaction.TransactionStatus;
+import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
 
-import java.util.HashSet;
-import java.util.Optional;
-import java.util.Set;
-import java.util.concurrent.atomic.AtomicBoolean;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.util.concurrent.atomic.AtomicInteger;
+
 
 @Repository
 public class MariaDBUserRepositoryImpl implements UserRepository {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(MariaDBUserRepositoryImpl.class);
+
     private final JdbcTemplate jdbcTemplate;
     private final TransactionTemplate transactionTemplate;
+    private final PasswordEncoder passwordEncoder;
 
-    public MariaDBUserRepositoryImpl(JdbcTemplate jdbcTemplate, TransactionTemplate transactionTemplate) {
+    public MariaDBUserRepositoryImpl(JdbcTemplate jdbcTemplate, TransactionTemplate transactionTemplate, PasswordEncoder passwordEncoder) {
         this.jdbcTemplate = jdbcTemplate;
         this.transactionTemplate = transactionTemplate;
+        this.passwordEncoder = passwordEncoder;
+    }
+
+
+    @Override
+    public UserDTO register(String username, String email, String password) {
+        KeyHolder keyHolder = new GeneratedKeyHolder();
+
+        try {
+            transactionTemplate.execute(new TransactionCallbackWithoutResult() {
+                @Override
+                protected void doInTransactionWithoutResult(TransactionStatus status) {
+                    jdbcTemplate.update(con -> {
+                        PreparedStatement ps = con.prepareStatement(Queries.REGISTER);
+
+                        ps.setString(1, username);
+                        ps.setString(2, email);
+                        ps.setString(3, passwordEncoder.encode(password));
+
+                        return ps;
+                    }, keyHolder);
+                }
+            });
+        } catch (TransactionException ignored) {
+            LOGGER.error("Transaction failed on insert a new user!");
+            return null;
+        }
+
+        return new UserDTO();
     }
 
     @Override
-    public Optional<UserAuthModel> findByUsernameForAuthentication(String username) {
-        UserAuthModel userAuthModel = new UserAuthModel();
+    public boolean isExists(String username) {
 
-        Set<String> roles = new HashSet<>();
+        AtomicInteger atomicInteger = new AtomicInteger();
 
-        AtomicBoolean isFound = new AtomicBoolean(false);
-
-        jdbcTemplate.query(Queries.FIND_BY_USERNAME_FOR_AUTHENTICATION, rs -> {
-            if (rs.isFirst()) {
-                isFound.set(true);
-
-                userAuthModel.setUsername(rs.getString(1));
-                userAuthModel.setPasswordHash(rs.getString(2));
-
-                roles.add(rs.getString(3));
-            } else {
-                roles.add(rs.getString(3));
-            }
+        jdbcTemplate.query(Queries.IS_EXIST, rs -> {
+            atomicInteger.set(rs.getInt(1));
         }, username);
 
-        userAuthModel.setRoles(roles);
-
-        return isFound.get() ? Optional.of(userAuthModel) : Optional.empty();
+        return atomicInteger.get() == 1;
     }
 
     private static class Queries {
-        private static final String FIND_BY_USERNAME_FOR_AUTHENTICATION = """
-                SELECT u.`username`, u.`password_hash`, r.`role`
-                FROM `users` AS u
-                JOIN `users_roles` AS ur
-                ON ur.`user_id` = u.`id`
-                JOIN `roles` AS r
-                ON ur.`role_id` = r.`id`
-                WHERE u.`username` = ?
-                """;
+        private static final String REGISTER = String.format("""
+                INSERT INTO `%s` (`username`, `email`, `password_hash`)
+                VALUE
+                (?, ?, ?)
+                """, UserEntity.TABLE_NAME);
+
+        private static final String IS_EXIST = String.format("""
+                SELECT COUNT(`username`)
+                FROM `%s`
+                WHERE `username` = ?
+                """, UserEntity.TABLE_NAME);
     }
 }

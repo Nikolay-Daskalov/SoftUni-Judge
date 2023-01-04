@@ -19,6 +19,10 @@ spring:
 #            password: 12345
 #            host: localhost
 #            port: 6379
+# !------> Maybe add enable this below
+server:
+    error:
+        include-message: always
 logging:
     level:
         org:

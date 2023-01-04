@@ -1,10 +1,10 @@
 package com.trading212.judge.repository.user;
 
-import com.trading212.judge.model.auth.UserAuthModel;
-
-import java.util.Optional;
+import com.trading212.judge.model.dto.UserDTO;
 
 public interface UserRepository {
 
-    Optional<UserAuthModel> findByUsernameForAuthentication(String username);
+    UserDTO register(String username, String email, String password);
+
+    boolean isExists(String username);
 }
