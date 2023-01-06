@@ -1,12 +1,11 @@
 package com.trading212.judge.repository.user.db.mariadb;
 
-import com.trading212.judge.model.dto.UserDTO;
 import com.trading212.judge.model.entity.user.UserEntity;
 import com.trading212.judge.repository.user.UserRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.PreparedStatementCreator;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -16,9 +15,9 @@ import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
 
-import java.sql.Connection;
+import java.math.BigInteger;
 import java.sql.PreparedStatement;
-import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.concurrent.atomic.AtomicInteger;
 
 
@@ -39,15 +38,15 @@ public class MariaDBUserRepositoryImpl implements UserRepository {
 
 
     @Override
-    public UserDTO register(String username, String email, String password) {
-        KeyHolder keyHolder = new GeneratedKeyHolder();
-
+    public boolean register(String username, String email, String password, Integer standardRoleId) {
         try {
             transactionTemplate.execute(new TransactionCallbackWithoutResult() {
                 @Override
                 protected void doInTransactionWithoutResult(TransactionStatus status) {
+                    KeyHolder keyHolder = new GeneratedKeyHolder();
+
                     jdbcTemplate.update(con -> {
-                        PreparedStatement ps = con.prepareStatement(Queries.REGISTER);
+                        PreparedStatement ps = con.prepareStatement(Queries.REGISTER, Statement.RETURN_GENERATED_KEYS);
 
                         ps.setString(1, username);
                         ps.setString(2, email);
@@ -55,29 +54,30 @@ public class MariaDBUserRepositoryImpl implements UserRepository {
 
                         return ps;
                     }, keyHolder);
+
+                    BigInteger userId = (BigInteger) keyHolder.getKey();
+
+                    jdbcTemplate.update(Queries.SET_STANDARD_ROLE, userId.intValue(), standardRoleId);
                 }
             });
-        } catch (TransactionException ignored) {
-            LOGGER.error("Transaction failed on insert a new user!");
-            return null;
+        } catch (TransactionException | DataAccessException ignored) {
+            LOGGER.error("Transaction failed to insert a new user!");
+            return false;
         }
 
-        return new UserDTO();
+        return true;
     }
 
     @Override
     public boolean isExists(String username) {
+        Integer existCount = jdbcTemplate.queryForObject(Queries.IS_EXIST, (rs, rowNumber) -> rs.getInt(1), username);
 
-        AtomicInteger atomicInteger = new AtomicInteger();
-
-        jdbcTemplate.query(Queries.IS_EXIST, rs -> {
-            atomicInteger.set(rs.getInt(1));
-        }, username);
-
-        return atomicInteger.get() == 1;
+        return existCount == 1;
     }
 
     private static class Queries {
+        private static final String USERS_ROLES_TABLE_NAME = "users_roles";
+
         private static final String REGISTER = String.format("""
                 INSERT INTO `%s` (`username`, `email`, `password_hash`)
                 VALUE
@@ -89,5 +89,11 @@ public class MariaDBUserRepositoryImpl implements UserRepository {
                 FROM `%s`
                 WHERE `username` = ?
                 """, UserEntity.TABLE_NAME);
+
+        private static final String SET_STANDARD_ROLE = String.format("""
+                INSERT INTO `%s` (`user_id`, `role_id`)
+                VALUE
+                (?, ?)
+                """, USERS_ROLES_TABLE_NAME);
     }
 }

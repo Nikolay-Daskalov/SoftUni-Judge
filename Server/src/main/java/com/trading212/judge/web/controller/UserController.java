@@ -1,7 +1,6 @@
 package com.trading212.judge.web.controller;
 
 import com.trading212.judge.model.binding.UserRegistrationBindingModel;
-import com.trading212.judge.model.dto.UserDTO;
 import com.trading212.judge.model.dto.UserRegistrationDTO;
 import com.trading212.judge.service.user.UserService;
 import com.trading212.judge.web.exception.UserExistException;
@@ -11,8 +10,6 @@ import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
-
-import java.net.URI;
 
 import static com.trading212.judge.web.controller.UserController.Routes;
 
@@ -28,8 +25,8 @@ public class UserController {
 
 
     @PostMapping(path = Routes.REGISTER)
-    public ResponseEntity<UserDTO> register(@RequestBody @Valid UserRegistrationBindingModel userRegistrationBindingModel,
-                                            BindingResult bindingResult, HttpServletRequest httpServletRequest) {
+    public ResponseEntity<?> register(@RequestBody @Valid UserRegistrationBindingModel userRegistrationBindingModel,
+                                      BindingResult bindingResult) {
 
         if (bindingResult.hasErrors() || !userRegistrationBindingModel.password().equals(userRegistrationBindingModel.confirmPassword())) {
             throw new UserRegistrationException("User credentials not valid!");
@@ -46,18 +43,18 @@ public class UserController {
                 userRegistrationBindingModel.email(),
                 userRegistrationBindingModel.password());
 
-        UserDTO user = userService.register(userRegistrationDTO);
+        boolean isRegistered = userService.register(userRegistrationDTO);
 
-        if (user == null) {
+        if (!isRegistered) {
             throw new UserRegistrationException("User registration failed!");
         }
 
-        return ResponseEntity.created(URI.create(httpServletRequest.getContextPath())).body(user);
+        return ResponseEntity.ok().build();
     }
 
-    static class Routes {
-        static final String BASE = "/api/users";
+    public static class Routes {
+        public static final String BASE = "/api/users";
 
-        static final String REGISTER = "/register";
+        public static final String REGISTER = "/register";
     }
 }

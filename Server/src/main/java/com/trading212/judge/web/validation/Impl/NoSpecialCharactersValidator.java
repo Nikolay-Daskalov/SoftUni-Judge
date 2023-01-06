@@ -10,7 +10,7 @@ import java.util.Set;
 @Component
 public class NoSpecialCharactersValidator implements ConstraintValidator<NoSpecialCharacters, String> {
 
-    private static final Set<Character> specialCharacters = Set.of('<', '>', '\\', '/', '"', '\'', '`', '%', '&', '=', ';', '|', '.', ',', ':');
+    private static final Set<Character> specialCharacters = Set.of('<', '>', '\\', '/', '"', '\'', '`', '%', '&', '=', ';', '|', ',', ':');
 
     public NoSpecialCharactersValidator() {
     }

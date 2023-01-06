@@ -1,6 +1,6 @@
 package com.trading212.judge.config;
 
-import com.trading212.judge.web.controller.DocumentController;
+import com.trading212.judge.web.controller.UserController;
 import com.trading212.judge.web.filter.JWTFilter;
 import com.trading212.judge.web.filter.JWTUsernamePasswordAuthenticationFilter;
 import org.springframework.context.annotation.Bean;
@@ -17,7 +17,7 @@ import org.springframework.security.web.authentication.AnonymousAuthenticationFi
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
-@EnableWebSecurity(debug = true)
+@EnableWebSecurity(debug = false)
 public class SecurityConfig {
 
     private static final String ALL_SUB_ROUTES = "/**";
@@ -31,7 +31,7 @@ public class SecurityConfig {
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and()
                 .authorizeHttpRequests() // Set routes matchers
-                .requestMatchers(DocumentController.Routes.BASE_ROUTE + ALL_SUB_ROUTES).permitAll()
+                .requestMatchers(UserController.Routes.BASE + UserController.Routes.REGISTER).permitAll()
                 .anyRequest().permitAll()
                 .and()
                 .addFilterBefore(authenticationFilter, UsernamePasswordAuthenticationFilter.class) // Add Custom filters in the SecurityFilterChain

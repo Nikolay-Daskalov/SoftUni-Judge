@@ -1,6 +1,5 @@
 package com.trading212.judge.service.user;
 
-import com.trading212.judge.model.dto.UserDTO;
 import com.trading212.judge.model.dto.UserRegistrationDTO;
 import com.trading212.judge.repository.user.UserRepository;
 import org.springframework.stereotype.Service;
@@ -9,9 +8,11 @@ import org.springframework.stereotype.Service;
 public class UserService {
 
     private final UserRepository userRepository;
+    private final RoleService roleService;
 
-    public UserService(UserRepository userRepository) {
+    public UserService(UserRepository userRepository, RoleService roleService) {
         this.userRepository = userRepository;
+        this.roleService = roleService;
     }
 
 
@@ -19,7 +20,9 @@ public class UserService {
         return userRepository.isExists(username);
     }
 
-    public UserDTO register(UserRegistrationDTO userRegistrationDTO) {
-        return userRepository.register(userRegistrationDTO.username(), userRegistrationDTO.email(), userRegistrationDTO.password());
+    public boolean register(UserRegistrationDTO userRegistrationDTO) {
+        Integer standardRoleId = roleService.getStandard();
+
+        return userRepository.register(userRegistrationDTO.username(), userRegistrationDTO.email(), userRegistrationDTO.password(), standardRoleId);
     }
 }

@@ -6,9 +6,10 @@ spring:
         password: ${DB_PASSWORD}
     flyway:
         driver-class-name: org.mariadb.jdbc.Driver
-        url: ${DB_URL}
+        url: ${FLYWAY_DB_URL}
         user: ${DB_USERNAME}
         password: ${DB_PASSWORD}
+        schema: ${DB_SCHEMA}
         default-schema: ${DB_SCHEMA}
         locations: classpath:db/migration
 #    cache:

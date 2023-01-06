@@ -4,7 +4,7 @@ import com.trading212.judge.model.dto.UserDTO;
 
 public interface UserRepository {
 
-    UserDTO register(String username, String email, String password);
+    boolean register(String username, String email, String password, Integer standardRoleId);
 
     boolean isExists(String username);
 }

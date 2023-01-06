@@ -7,7 +7,8 @@ import java.time.Instant;
 import java.util.Objects;
 
 public class RoleEntity extends BaseEntity {
-    private static final String TABLE_NAME = "roles";
+
+    public static final String TABLE_NAME = "roles";
 
     private final RoleEnum role;
 
