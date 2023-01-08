@@ -10,7 +10,7 @@ public class TaskEntity extends BaseEntity {
     public static final String TABLE_NAME = "tasks";
 
     private String name;
-    private DocumentEntity description;
+    private DocumentEntity document;
     private String answersURL;
 
     public TaskEntity() {
@@ -25,8 +25,8 @@ public class TaskEntity extends BaseEntity {
         return answersURL;
     }
 
-    public DocumentEntity getDescription() {
-        return description;
+    public DocumentEntity getDocument() {
+        return document;
     }
 
     @Override
@@ -34,12 +34,12 @@ public class TaskEntity extends BaseEntity {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         TaskEntity that = (TaskEntity) o;
-        return id.equals(that.id) && name.equals(that.name) && description.equals(that.description) && answersURL.equals(that.answersURL);
+        return id.equals(that.id) && name.equals(that.name) && document.equals(that.document) && answersURL.equals(that.answersURL);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, name, description, answersURL);
+        return Objects.hash(id, name, document, answersURL);
     }
 
     public static class Builder {
@@ -59,8 +59,8 @@ public class TaskEntity extends BaseEntity {
             return this;
         }
 
-        public Builder setDescription(DocumentEntity description) {
-            task.description = description;
+        public Builder setDocument(DocumentEntity description) {
+            task.document = description;
             return this;
         }
 
@@ -81,7 +81,7 @@ public class TaskEntity extends BaseEntity {
         public void reset() {
             task.id = null;
             task.name = null;
-            task.description = null;
+            task.document = null;
             task.answersURL = null;
             task.createdAt = null;
         }

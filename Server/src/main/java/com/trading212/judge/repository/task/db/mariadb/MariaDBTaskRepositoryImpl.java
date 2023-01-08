@@ -9,7 +9,6 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.support.TransactionTemplate;
 
-import java.time.Instant;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
@@ -40,13 +39,13 @@ public class MariaDBTaskRepositoryImpl implements TaskRepository {
 
     @Override
     public boolean isExist(String name) {
-        Integer existCount = jdbcTemplate.queryForObject(Queries.IS_EXIST, (rs, rowNum) -> rs.getInt(1), name);
+        Integer result = jdbcTemplate.queryForObject(Queries.IS_EXIST, (rs, rowNum) -> rs.getInt(1), name);
 
-        return existCount == 1;
+        return result == 1;
     }
 
     @Override
-    public boolean create(String name, String answersURL, Integer docId) {
+    public boolean save(String name, String answersURL, Integer docId) {
         try {
             jdbcTemplate.update(Queries.CREATE, name, answersURL, docId);
             return true;
@@ -57,8 +56,12 @@ public class MariaDBTaskRepositoryImpl implements TaskRepository {
 
     @Override
     public boolean deleteByDocument(Integer id) {
-        transactionTemplate.getTransactionManager();
-        return false;
+        try {
+            jdbcTemplate.update(Queries.DELETE_BY_DOCUMENT_ID, id);
+            return true;
+        } catch (DataAccessException ignored) {
+            return false;
+        }
     }
 
 

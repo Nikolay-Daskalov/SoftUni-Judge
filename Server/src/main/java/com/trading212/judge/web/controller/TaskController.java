@@ -3,7 +3,7 @@ package com.trading212.judge.web.controller;
 import com.trading212.judge.model.binding.TaskBindingModel;
 import com.trading212.judge.model.dto.TaskCreationDTO;
 import com.trading212.judge.service.task.TaskService;
-import com.trading212.judge.web.exception.TaskCreationException;
+import com.trading212.judge.web.exception.task.TaskCreationException;
 import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -55,7 +55,14 @@ public class TaskController {
 
         boolean isCreated = taskService.create(task);
 
-        return isCreated ? ResponseEntity.ok().build() : ResponseEntity.badRequest().build();
+        jsonFile.delete();
+
+        if (!isCreated) {
+            throw new TaskCreationException("Invalid data!");
+        }
+
+        // TODO: add more refactoring
+        return ResponseEntity.status(201).build();
     }
 
     public static class Route {

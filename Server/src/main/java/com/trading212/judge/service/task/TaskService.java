@@ -1,15 +1,12 @@
 package com.trading212.judge.service.task;
 
-import com.trading212.judge.model.dto.TaskByDescriptionDTO;
 import com.trading212.judge.model.dto.TaskCreationDTO;
 import com.trading212.judge.model.dto.TaskSimpleDTO;
 import com.trading212.judge.repository.task.TaskRepository;
 import org.springframework.stereotype.Service;
 
-import java.util.LinkedHashSet;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 @Service
 public class TaskService {
@@ -28,7 +25,7 @@ public class TaskService {
         return taskRepository.findAllByDocument(id);
     }
 
-    private boolean isExist(String name) {
+    public boolean isExist(String name) {
         return taskRepository.isExist(name);
     }
 
@@ -47,9 +44,7 @@ public class TaskService {
 
         //TODO: send it to AWS and save url;
 
-        taskCreationDTO.answersJSON().delete();
-
-        return taskRepository.create(taskCreationDTO.name(), "someURL", docId.get());
+        return taskRepository.save(taskCreationDTO.name(), "someURL", docId.get());
     }
 
     public boolean deleteByDocument(Integer id) {
