@@ -1,29 +1,20 @@
 package com.trading212.judge.repository.task.db.mariadb;
 
-import com.trading212.judge.model.dto.DocumentDTO;
 import com.trading212.judge.model.dto.DocumentSimpleDTO;
 import com.trading212.judge.model.entity.task.DocumentEntity;
-import com.trading212.judge.model.entity.task.TaskEntity;
 import com.trading212.judge.repository.task.DocumentRepository;
 import com.trading212.judge.service.enums.DocumentDifficulty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.PreparedStatementCreator;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
-import org.springframework.transaction.TransactionException;
-import org.springframework.transaction.TransactionStatus;
-import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
 
-import java.sql.Connection;
 import java.sql.PreparedStatement;
-import java.sql.SQLException;
 import java.sql.Statement;
-import java.time.Instant;
 import java.time.ZoneOffset;
 import java.util.LinkedHashSet;
 import java.util.Optional;
@@ -61,10 +52,23 @@ public class MariaDBDocumentRepositoryImpl implements DocumentRepository {
     }
 
     @Override
-    public Optional<Integer> findByName(String name) {
-        Integer id = jdbcTemplate.queryForObject(Queries.FIND_BY_NAME, (rs, rowNum) -> rs.getInt(1), name);
+    public Optional<DocumentEntity> findByName(String name) {
+        DocumentEntity documentEntity = jdbcTemplate.query(Queries.FIND_BY_NAME, rs -> {
+            if (!rs.next()) {
+                return null;
+            }
 
-        return Optional.of(id);//TODO: use different method
+            return new DocumentEntity.Builder()
+                    .setId(rs.getInt(1))
+                    .setName(rs.getString(2))
+                    .setURL(rs.getString(3))
+                    .setDifficulty(DocumentDifficulty.valueOf(rs.getString(4)))
+                    .setIsTest(rs.getBoolean(5))
+                    .setCreatedAt(rs.getTimestamp(6).toLocalDateTime().toInstant(ZoneOffset.UTC))
+                    .build();
+        }, name);
+
+        return Optional.ofNullable(documentEntity);
     }
 
     @Override
@@ -72,7 +76,7 @@ public class MariaDBDocumentRepositoryImpl implements DocumentRepository {
         DocumentEntity documentEntity = jdbcTemplate.query(Queries.FIND_BY_ID, (rs) -> {
             if (!rs.next()) {
                 return null;
-            }
+            }//TODO: check if works
 
             return new DocumentEntity.Builder()
                     .setId(rs.getInt(1))
@@ -88,7 +92,7 @@ public class MariaDBDocumentRepositoryImpl implements DocumentRepository {
     }
 
     @Override
-    public Optional<Integer> save(String name, String docURL, DocumentDifficulty difficulty, boolean isTest) {
+    public Integer save(String name, String docURL, DocumentDifficulty difficulty, boolean isTest) {
         try {
             KeyHolder keyHolder = new GeneratedKeyHolder();
 
@@ -103,40 +107,30 @@ public class MariaDBDocumentRepositoryImpl implements DocumentRepository {
                 return ps;
             }, keyHolder);
 
-            return Optional.of(keyHolder.getKey().intValue());
+            return keyHolder.getKey().intValue();
         } catch (DataAccessException ignored) {
-            return Optional.empty();
+            return null;
         }
     }
 
     @Override
     public boolean isExist(String name) {
-        Integer result = jdbcTemplate.queryForObject(Queries.IS_EXIST, (rs, rowNum) -> rs.getInt(1), name);
+        Integer result = jdbcTemplate.queryForObject(Queries.IS_EXIST_BY_NAME, (rs, rowNum) -> rs.getInt(1), name);
+
+        return result == 1;
+    }
+
+    @Override
+    public boolean isExist(Integer id) {
+        Integer result = jdbcTemplate.queryForObject(Queries.IS_EXIST_BY_ID, (rs, rowNum) -> rs.getInt(1), id);
 
         return result == 1;
     }
 
     @Override
     public boolean delete(Integer id) {
-        try {
-            transactionTemplate.execute(new TransactionCallbackWithoutResult() {
-                @Override
-                protected void doInTransactionWithoutResult(TransactionStatus status) {
-                    boolean isDeleted = mariaDBTaskRepository.deleteByDocument(id);
-
-                    if (!isDeleted) {
-                        status.setRollbackOnly();
-                        return;
-                    }
-
-                    jdbcTemplate.update(Queries.DELETE_BY_ID, id);
-                }
-            });
-            return true;
-        } catch (TransactionException ignored) {
-            LOGGER.error("Deleting a document failed");
-            return false;
-        }
+        jdbcTemplate.update(Queries.DELETE_BY_ID, id);
+        return true;
     }
 
     private static class Queries {
@@ -146,7 +140,7 @@ public class MariaDBDocumentRepositoryImpl implements DocumentRepository {
                 """, DocumentEntity.TABLE_NAME);
 
         private static final String FIND_BY_NAME = String.format("""
-                SELECT `id`
+                SELECT `id`, `name`, `url`, `difficulty`, `is_test`, `created_at`
                 FROM `%s`
                 WHERE `name` = ?
                 """, DocumentEntity.TABLE_NAME);
@@ -163,10 +157,16 @@ public class MariaDBDocumentRepositoryImpl implements DocumentRepository {
                 (?, ?, ?, ?)
                 """, DocumentEntity.TABLE_NAME);
 
-        private static final String IS_EXIST = String.format("""
+        private static final String IS_EXIST_BY_NAME = String.format("""
                 SELECT COUNT(`id`)
                 FROM `%s`
                 WHERE `name` = ?
+                """, DocumentEntity.TABLE_NAME);
+
+        private static final String IS_EXIST_BY_ID = String.format("""
+                SELECT COUNT(`id`)
+                FROM `%s`
+                WHERE `id` = ?
                 """, DocumentEntity.TABLE_NAME);
 
         private static final String DELETE_BY_ID = String.format("""

@@ -26,11 +26,11 @@ public class RoleEntity extends BaseEntity {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         RoleEntity that = (RoleEntity) o;
-        return id.equals(that.id) && role == that.role;
+        return role == that.role;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, role);
+        return Objects.hash(role);
     }
 }

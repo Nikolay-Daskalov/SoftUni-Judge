@@ -3,7 +3,7 @@ package com.trading212.judge.web.filter;
 import com.trading212.judge.model.dto.UserAccessToken;
 import com.trading212.judge.util.jwt.JWTUtil;
 import com.trading212.judge.web.exception.AuthorizationHeaderNotValidException;
-import com.trading212.judge.web.exception.InvalidAccessTokenException;
+import com.trading212.judge.web.exception.user.InvalidAccessTokenException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;

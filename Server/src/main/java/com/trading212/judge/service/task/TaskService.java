@@ -1,24 +1,22 @@
 package com.trading212.judge.service.task;
 
-import com.trading212.judge.model.dto.TaskCreationDTO;
+import com.trading212.judge.model.dto.TaskDTO;
 import com.trading212.judge.model.dto.TaskSimpleDTO;
+import com.trading212.judge.model.entity.task.TaskEntity;
 import com.trading212.judge.repository.task.TaskRepository;
 import org.springframework.stereotype.Service;
 
+import java.io.File;
 import java.util.Optional;
 import java.util.Set;
 
 @Service
 public class TaskService {
 
-    private static final String ANSWER_URL_PROVIDER_PREFIX = "https://someprovider.com";
-
     private final TaskRepository taskRepository;
-    private final DocumentService documentService;
 
-    public TaskService(TaskRepository taskRepository, DocumentService documentService) {
+    public TaskService(TaskRepository taskRepository) {
         this.taskRepository = taskRepository;
-        this.documentService = documentService;
     }
 
     public Set<TaskSimpleDTO> findAllByDocument(Integer id) {
@@ -29,25 +27,46 @@ public class TaskService {
         return taskRepository.isExist(name);
     }
 
-    public boolean create(TaskCreationDTO taskCreationDTO) {
-        boolean exist = isExist(taskCreationDTO.name());
-
-        if (exist) {
-            return false;
-        }
-
-        Optional<Integer> docId = documentService.findByName(taskCreationDTO.documentName());
-
-        if (docId.isEmpty()) {
-            return false;
-        }
+    public Optional<TaskDTO> create(String taskName, File file, Integer docId) {
 
         //TODO: send it to AWS and save url;
 
-        return taskRepository.save(taskCreationDTO.name(), "someURL", docId.get());
+        Optional<Integer> savedTask = taskRepository.save(taskName, "someURL", docId);
+
+        if (savedTask.isEmpty()) {
+            return Optional.empty();
+        }
+
+        Optional<TaskEntity> taskById = taskRepository.findById(savedTask.get());
+
+        return mapTask(taskById);
     }
 
-    public boolean deleteByDocument(Integer id) {
-        return taskRepository.deleteByDocument(id);
+    private Optional<TaskDTO> mapTask(Optional<TaskEntity> taskEntity) {
+        if (taskEntity.isEmpty()) {
+            return Optional.empty();
+        }
+
+        TaskEntity task = taskEntity.get();
+
+        TaskDTO taskDTO = new TaskDTO(
+                task.getId(),
+                task.getName(),
+                task.getDocument().getId(),
+                task.getAnswersURL(),
+                task.getCreatedAt()
+        );
+
+        return Optional.of(taskDTO);
+    }
+
+    public boolean deleteAllByDocument(Integer id) {
+        return taskRepository.deleteAllByDocument(id);
+    }
+
+    public Optional<TaskDTO> findById(Integer id) {
+        Optional<TaskEntity> taskEntity = taskRepository.findById(id);
+
+        return mapTask(taskEntity);
     }
 }

@@ -34,12 +34,12 @@ public class TaskEntity extends BaseEntity {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         TaskEntity that = (TaskEntity) o;
-        return id.equals(that.id) && name.equals(that.name) && document.equals(that.document) && answersURL.equals(that.answersURL);
+        return name.equals(that.name) && document.equals(that.document) && answersURL.equals(that.answersURL);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, name, document, answersURL);
+        return Objects.hash(name, document, answersURL);
     }
 
     public static class Builder {

@@ -40,12 +40,12 @@ public class UserEntity extends BaseEntity {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         UserEntity that = (UserEntity) o;
-        return id.equals(that.id) && username.equals(that.username) && passwordHash.equals(that.passwordHash) && email.equals(that.email) && roles.equals(that.roles);
+        return username.equals(that.username) && passwordHash.equals(that.passwordHash) && email.equals(that.email) && roles.equals(that.roles);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, username, passwordHash, email, roles);
+        return Objects.hash(username, passwordHash, email, roles);
     }
 
     public static class Builder {

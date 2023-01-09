@@ -4,16 +4,27 @@ import com.trading212.judge.model.dto.TaskSimpleDTO;
 import com.trading212.judge.model.entity.task.DocumentEntity;
 import com.trading212.judge.model.entity.task.TaskEntity;
 import com.trading212.judge.repository.task.TaskRepository;
+import com.trading212.judge.service.enums.DocumentDifficulty;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.support.GeneratedKeyHolder;
+import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.support.TransactionTemplate;
 
+import java.sql.PreparedStatement;
+import java.sql.Statement;
+import java.time.ZoneOffset;
 import java.util.LinkedHashSet;
+import java.util.Optional;
 import java.util.Set;
 
 @Repository
 public class MariaDBTaskRepositoryImpl implements TaskRepository {
+
+    private final static Logger LOGGER = LoggerFactory.getLogger(MariaDBTaskRepositoryImpl.class);
 
     private final JdbcTemplate jdbcTemplate;
     private final TransactionTemplate transactionTemplate;
@@ -38,6 +49,35 @@ public class MariaDBTaskRepositoryImpl implements TaskRepository {
     }
 
     @Override
+    public Optional<TaskEntity> findById(Integer id) {
+        TaskEntity taskEntity = jdbcTemplate.query(Queries.FIND_BY_ID, rs -> {
+            if (!rs.next()) {
+                return null;
+            }
+
+            DocumentEntity documentEntity = new DocumentEntity.Builder()
+                    .setId(rs.getInt(5))
+                    .setName(rs.getString(6))
+                    .setURL(rs.getString(7))
+                    .setDifficulty(DocumentDifficulty.valueOf(rs.getString(8)))
+                    .setIsTest(rs.getBoolean(9))
+                    .setCreatedAt(rs.getTimestamp(10).toLocalDateTime().toInstant(ZoneOffset.UTC))
+                    .build();
+
+
+            return new TaskEntity.Builder()
+                    .setId(rs.getInt(1))
+                    .setName(rs.getString(2))
+                    .setAnswersURL(rs.getString(3))
+                    .setCreatedAt(rs.getTimestamp(4).toLocalDateTime().toInstant(ZoneOffset.UTC))
+                    .setDocument(documentEntity)
+                    .build();
+        }, id);
+
+        return Optional.ofNullable(taskEntity);
+    }
+
+    @Override
     public boolean isExist(String name) {
         Integer result = jdbcTemplate.queryForObject(Queries.IS_EXIST, (rs, rowNum) -> rs.getInt(1), name);
 
@@ -45,23 +85,29 @@ public class MariaDBTaskRepositoryImpl implements TaskRepository {
     }
 
     @Override
-    public boolean save(String name, String answersURL, Integer docId) {
+    public Optional<Integer> save(String name, String answersURL, Integer docId) {
         try {
-            jdbcTemplate.update(Queries.CREATE, name, answersURL, docId);
-            return true;
+            KeyHolder keyHolder = new GeneratedKeyHolder();
+            jdbcTemplate.update(con -> {
+                PreparedStatement ps = con.prepareStatement(Queries.CREATE, Statement.RETURN_GENERATED_KEYS);
+
+                ps.setString(1, name);
+                ps.setString(2, answersURL);
+                ps.setInt(3, docId);
+
+                return ps;
+            }, keyHolder);
+
+            return Optional.of(keyHolder.getKey().intValue());
         } catch (DataAccessException ignored) {
-            return false;
+            return Optional.empty();
         }
     }
 
     @Override
-    public boolean deleteByDocument(Integer id) {
-        try {
-            jdbcTemplate.update(Queries.DELETE_BY_DOCUMENT_ID, id);
-            return true;
-        } catch (DataAccessException ignored) {
-            return false;
-        }
+    public boolean deleteAllByDocument(Integer id) {
+        jdbcTemplate.update(Queries.DELETE_BY_DOCUMENT_ID, id);
+        return true;
     }
 
 
@@ -90,5 +136,14 @@ public class MariaDBTaskRepositoryImpl implements TaskRepository {
                 DELETE FROM `%s`
                 WHERE `document_id` = ?
                 """, TaskEntity.TABLE_NAME);
+
+        private static final String FIND_BY_ID = String.format("""
+                SELECT t.`id`, t.`name`, t.`answer_url`, t.`created_at`,
+                d.`id`, d.`name`, d.`url`, d.`difficulty`, d.`is_test`, d.`created_at`
+                FROM `%s` AS t
+                JOIN `%s` AS d
+                ON t.`document_id` = d.`id`
+                WHERE t.`id` = ?
+                """, TaskEntity.TABLE_NAME, DocumentEntity.TABLE_NAME);
     }
 }

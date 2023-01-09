@@ -40,12 +40,12 @@ public class DocumentEntity extends BaseEntity {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         DocumentEntity that = (DocumentEntity) o;
-        return name.equals(that.name) && url.equals(that.url) && difficulty == that.difficulty;
+        return name.equals(that.name) && url.equals(that.url) && difficulty == that.difficulty && isTest.equals(that.isTest);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(name, url, difficulty);
+        return Objects.hash(name, url, difficulty, isTest);
     }
 
     public static class Builder {

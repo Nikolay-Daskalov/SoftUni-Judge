@@ -16,5 +16,5 @@ public record DocumentBindingModel(
         Boolean isTest,
         @NotNull
         @IsDocx
-        MultipartFile file) {
+        MultipartFile document) {
 }

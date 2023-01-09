@@ -26,11 +26,11 @@ public class LanguageEntity extends BaseEntity {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         LanguageEntity that = (LanguageEntity) o;
-        return id.equals(that.id) && languageEnum == that.languageEnum;
+        return languageEnum == that.languageEnum;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, languageEnum);
+        return Objects.hash(languageEnum);
     }
 }

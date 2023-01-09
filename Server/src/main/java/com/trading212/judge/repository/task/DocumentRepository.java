@@ -12,13 +12,15 @@ public interface DocumentRepository {
 
     Set<DocumentSimpleDTO> getAll();
 
-    Optional<Integer> findByName(String name);
+    Optional<DocumentEntity> findByName(String name);
 
     Optional<DocumentEntity> findById(Integer id);
 
-    Optional<Integer> save(String name, String docURL, DocumentDifficulty difficulty, boolean isTest);
+    Integer save(String name, String docURL, DocumentDifficulty difficulty, boolean isTest);
 
     boolean isExist(String name);
+
+    boolean isExist(Integer id);
 
     boolean delete(Integer id);
 }

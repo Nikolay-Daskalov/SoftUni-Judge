@@ -2,6 +2,7 @@ package com.trading212.judge.util.parser.Impl;
 
 import com.trading212.judge.util.parser.DocumentParser;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
+import org.apache.poi.openxml4j.exceptions.NotOfficeXmlFileException;
 import org.apache.poi.openxml4j.opc.OPCPackage;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.springframework.stereotype.Component;
@@ -11,6 +12,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.zip.ZipException;
 
 @Component
 public class DocumentParserImpl implements DocumentParser {
@@ -20,8 +22,10 @@ public class DocumentParserImpl implements DocumentParser {
 
     @Override
     public boolean parse(MultipartFile file) {
+        File tempDoc = null;
+
         try {
-            File tempDoc = File.createTempFile("doc", "docx");
+            tempDoc = File.createTempFile("doc", "docx");
 
             FileOutputStream tempDocOutputStream = new FileOutputStream(tempDoc);
 
@@ -35,7 +39,11 @@ public class DocumentParserImpl implements DocumentParser {
             tempDoc.delete();
 
             return true;
-        } catch (InvalidFormatException | IOException e) {
+        } catch (InvalidFormatException | NotOfficeXmlFileException | IOException e) {
+            if (tempDoc != null) {
+                tempDoc.delete();
+            }
+
             return false;
         }
     }
