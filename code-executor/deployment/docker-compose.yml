@@ -1,0 +1,22 @@
+version: '3'
+services:
+    code-executor:
+        image: exe
+        ports:
+            - "8088:8081"
+        deploy:
+            replicas: 3
+            restart_policy:
+                condition: on-failure
+#networks:
+#    internet:
+#        driver: bridge
+#    no-internet:
+#        driver: bridge
+#        internal: true
+
+# To start them use:
+#    1. set up networks
+#    2. docker swarm init,
+#    3. docker stack deploy -f {path/to/compose.yml} {stack-name},
+#    4. docker
