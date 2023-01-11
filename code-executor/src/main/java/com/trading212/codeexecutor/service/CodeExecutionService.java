@@ -5,49 +5,63 @@ import com.trading212.codeexecutor.enums.LanguageEnum;
 import org.springframework.stereotype.Service;
 
 import java.io.*;
-import java.util.concurrent.TimeUnit;
+import java.util.List;
 
 @Service
 public class CodeExecutionService {
 
-    private static final String PROGRAM_CLASS = "Solution";
-    private static final Integer MAX_EXECUTION_TIME_SECONDS = 10;
-    private static final TimeUnit TIME_UNIT = TimeUnit.SECONDS;
-
     public CodeExecutionService() {
     }
 
-    public CodeResultEnum execute(String source, LanguageEnum language) {
+    public CodeResultEnum execute(String source, LanguageEnum language, List<String> testOutputs, List<String> testInputs) {
         try {
             File tempFile = createFile(source);
 
-            ProcessBuilder pb = new ProcessBuilder("javac", tempFile.getAbsolutePath());
-            Process p = pb.start();
+            ProcessService processService = new ProcessService();
+            boolean isRunnable = processService.checkIfCodeCanRun(tempFile, language);
 
-            boolean isExecuted = ls.waitFor(10, TimeUnit.SECONDS);
-
-            if (!isExecuted) {
-                ls.destroyForcibly();
+            if (!isRunnable) {
+                tempFile.delete();
+                return null;
             }
 
-            System.out.println(ls.exitValue());
-
-            BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(ls.getInputStream()));
-
-            String line = null;
-
-            while ((line = bufferedReader.readLine()) != null) {
-                System.out.println(line);
-            }
-
-            bufferedReader.close();
+            List<String> outputs = processService.run(testInputs.toArray(String[]::new));
 
             tempFile.delete();
+            deleteClassFile();
+
+            return checkResult(outputs, testOutputs);
         } catch (IOException | InterruptedException e) {
             throw new RuntimeException(e);
         }
+    }
 
-        return null;
+    private CodeResultEnum checkResult(List<String> outputs, List<String> testOutputs) {
+        if (outputs.size() != testOutputs.size()) {
+            return CodeResultEnum.FAILED;
+        }
+
+        for (int i = 0; i < testOutputs.size(); i++) {
+            if (!testOutputs.get(i).equals(outputs.get(i))) {
+                return CodeResultEnum.FAILED;
+            }
+        }
+
+        return CodeResultEnum.PASSED;
+    }
+
+    private void deleteClassFile() throws IOException, InterruptedException {
+        String tempDir = ProcessService.TEMP_DIR;
+
+        ProcessBuilder deleteProcessBuilder = new ProcessBuilder("bash", "-c", "find . -type f -maxdepth 1  -name \"*.class\" -exec rm {} \\;");
+
+        deleteProcessBuilder.directory(new File(tempDir));
+
+        Process deleteProcess = deleteProcessBuilder.start();
+
+        deleteProcess.waitFor();
+
+        deleteProcess.destroyForcibly();
     }
 
     private File createFile(String source) throws IOException {

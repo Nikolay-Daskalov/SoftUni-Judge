@@ -24,8 +24,13 @@ public class CodeExecutionController {
 
 
     @PostMapping
-    public ResponseEntity<?> postCode(@RequestBody CodeDataBindingModel codeDataBindingModel) {
-        CodeResultEnum executionResult = codeExecutionService.execute(codeDataBindingModel.code(), codeDataBindingModel.language());
+    public ResponseEntity<CodeExecutionResultViewModel> postCode(@RequestBody CodeDataBindingModel codeDataBindingModel) {
+
+        CodeResultEnum executionResult = codeExecutionService.execute(
+                codeDataBindingModel.code(),
+                codeDataBindingModel.language(),
+                codeDataBindingModel.testOutputs(),
+                codeDataBindingModel.testInputs());
 
         CodeExecutionResultViewModel codeExecutionResultViewModel = new CodeExecutionResultViewModel(executionResult);
 

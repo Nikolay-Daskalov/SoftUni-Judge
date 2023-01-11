@@ -1,6 +1,6 @@
 package com.trading212.judge.model.entity.task;
 
-import com.trading212.judge.model.entity.task.enums.LanguageEnum;
+import com.trading212.judge.model.entity.task.enums.CodeLanguageEnum;
 import com.trading212.judge.model.entity.base.BaseEntity;
 
 import java.time.Instant;
@@ -10,15 +10,15 @@ public class LanguageEntity extends BaseEntity {
 
     public static final String TABLE_NAME = "languages";
 
-    private final LanguageEnum languageEnum;
+    private final CodeLanguageEnum codeLanguageEnum;
 
-    public LanguageEntity(Integer id, Instant createdAt, LanguageEnum languageEnum) {
+    public LanguageEntity(Integer id, Instant createdAt, CodeLanguageEnum codeLanguageEnum) {
         super(id, createdAt);
-        this.languageEnum = languageEnum;
+        this.codeLanguageEnum = codeLanguageEnum;
     }
 
-    public LanguageEnum getLanguageEnum() {
-        return languageEnum;
+    public CodeLanguageEnum getLanguageEnum() {
+        return codeLanguageEnum;
     }
 
     @Override
@@ -26,11 +26,11 @@ public class LanguageEntity extends BaseEntity {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         LanguageEntity that = (LanguageEntity) o;
-        return languageEnum == that.languageEnum;
+        return codeLanguageEnum == that.codeLanguageEnum;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(languageEnum);
+        return Objects.hash(codeLanguageEnum);
     }
 }
