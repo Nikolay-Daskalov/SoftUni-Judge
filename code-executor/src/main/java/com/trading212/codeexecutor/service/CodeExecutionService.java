@@ -18,9 +18,9 @@ public class CodeExecutionService {
             File tempFile = createFile(source);
 
             ProcessService processService = new ProcessService();
-            boolean isRunnable = processService.checkIfCodeCanRun(tempFile, language);
+            boolean canRun = processService.checkIfCodeCanRun(tempFile, language);
 
-            if (!isRunnable) {
+            if (!canRun) {
                 tempFile.delete();
                 return null;
             }

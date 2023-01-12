@@ -2,6 +2,8 @@ package com.trading212.judge.web.controller;
 
 import com.trading212.judge.model.binding.CodeBindingModel;
 import com.trading212.judge.service.task.CodeExecutionService;
+import com.trading212.judge.service.task.TaskService;
+import com.trading212.judge.service.user.UserService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
@@ -32,7 +34,11 @@ public class CodeExecutionController {
             return ResponseEntity.badRequest().build();
         }
 
-        codeExecutionService.execute(codeBindingModel.sourceCode(), codeBindingModel.codeLanguageEnum(), principal.getName());
+        Boolean codeResult = codeExecutionService.execute(codeBindingModel.sourceCode(), codeBindingModel.codeLanguage(), codeBindingModel.taskId(), principal.getName());
+
+        if (codeResult == null) {
+            throw new RuntimeException();//TODO
+        }
 
         return ResponseEntity.notFound().build();
     }

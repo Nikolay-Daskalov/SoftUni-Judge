@@ -40,7 +40,6 @@ public class TaskController {
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<TaskDTO> findByDescription(@ModelAttribute @Valid TaskBindingModel taskBindingModel,
                                                      BindingResult bindingResult, HttpServletRequest httpServletRequest) {
-
         if (bindingResult.hasErrors()) {
             throw new TaskCreationException("Task fields not valid!");
         }

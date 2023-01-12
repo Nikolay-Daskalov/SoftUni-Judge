@@ -1,5 +1,7 @@
 package com.trading212.judge.service.task;
 
+import com.amazonaws.services.s3.AmazonS3;
+import com.amazonaws.services.s3.model.PutObjectResult;
 import com.trading212.judge.model.dto.TaskDTO;
 import com.trading212.judge.model.dto.TaskSimpleDTO;
 import com.trading212.judge.model.entity.task.TaskEntity;
@@ -14,9 +16,11 @@ import java.util.Set;
 public class TaskService {
 
     private final TaskRepository taskRepository;
+    private final AmazonS3 amazonS3;
 
-    public TaskService(TaskRepository taskRepository) {
+    public TaskService(TaskRepository taskRepository, AmazonS3 amazonS3) {
         this.taskRepository = taskRepository;
+        this.amazonS3 = amazonS3;
     }
 
     public Set<TaskSimpleDTO> findAllByDocument(Integer id) {
@@ -27,11 +31,17 @@ public class TaskService {
         return taskRepository.isExist(name);
     }
 
+    public boolean isExist(Integer id) {
+        return taskRepository.isExist(id);
+    }
+
     public Optional<TaskDTO> create(String taskName, File file, Integer docId) {
 
-        //TODO: send it to AWS and save url;
+        amazonS3.putObject("trading212-judge-submissions", taskName + "-answers.json", file);
 
-        Optional<Integer> savedTask = taskRepository.save(taskName, "someURL", docId);
+        String taskAnswersURL = amazonS3.getUrl("trading212-judge-submissions", taskName).toString();
+
+        Optional<Integer> savedTask = taskRepository.save(taskName, taskAnswersURL, docId);
 
         if (savedTask.isEmpty()) {
             return Optional.empty();

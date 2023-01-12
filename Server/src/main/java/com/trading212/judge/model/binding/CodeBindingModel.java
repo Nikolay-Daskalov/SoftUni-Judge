@@ -6,7 +6,9 @@ import jakarta.validation.constraints.NotNull;
 
 public record CodeBindingModel(
         @NotNull
-        CodeLanguageEnum codeLanguageEnum,
+        CodeLanguageEnum codeLanguage,
         @NotBlank
-        String sourceCode) {
+        String sourceCode,
+        @NotNull
+        Integer taskId) {
 }

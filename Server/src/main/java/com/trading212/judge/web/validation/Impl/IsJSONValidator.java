@@ -47,7 +47,7 @@ public class IsJSONValidator implements ConstraintValidator<IsJSON, MultipartFil
 
     private boolean isJSON(MultipartFile file) {
         try {
-            File fileToValidate = File.createTempFile("answers", "json");
+            File fileToValidate = File.createTempFile("answers", ".json");
             Files.write(fileToValidate.toPath(), file.getBytes());
 
             objectMapper.readValue(fileToValidate, TaskAnswersJSON.class);

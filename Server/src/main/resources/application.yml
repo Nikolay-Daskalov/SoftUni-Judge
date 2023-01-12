@@ -1,16 +1,16 @@
 spring:
-   datasource:
-      driver-class-name: org.mariadb.jdbc.Driver
-      url: ${DB_URL}
-      username: ${DB_USERNAME}
-      password: ${DB_PASSWORD}
-   flyway:
-      driver-class-name: org.mariadb.jdbc.Driver
-      url: ${FLYWAY_DB_URL}
-      user: ${DB_USERNAME}
-      password: ${DB_PASSWORD}
-      default-schema: ${DB_SCHEMA}
-      locations: classpath:db/migration
+    datasource:
+        driver-class-name: org.mariadb.jdbc.Driver
+        url: ${DB_URL}
+        username: ${DB_USERNAME}
+        password: ${DB_PASSWORD}
+    flyway:
+        driver-class-name: org.mariadb.jdbc.Driver
+        url: ${FLYWAY_DB_URL}
+        user: ${DB_USERNAME}
+        password: ${DB_PASSWORD}
+        default-schema: ${DB_SCHEMA}
+        locations: classpath:db/migration
 #    cache:
 #        type: redis
 #    data:
@@ -21,17 +21,22 @@ spring:
 #            port: 6379
 # !------> Maybe add enable this below
 server:
-   error:
-      include-message: always
+    error:
+        include-message: always
 logging:
-   level:
-      org:
-         springframework:
-            jdbc:
-               core:
-                  JdbcTemplate:
-                     DEBUG
-                  StatementCreatorUtils:
-                     TRACE
+    level:
+        org:
+            springframework:
+                jdbc:
+                    core:
+                        JdbcTemplate:
+                            DEBUG
+                        StatementCreatorUtils:
+                            TRACE
 jwt-secret:
-   ${JWT_SECRET}
+    ${JWT_SECRET}
+aws:
+    credentials:
+        access-key: ${AWS_ACCESS_KEY}
+        secret-key: ${AWS_SECRET_KEY}
+        region: ${AWS_REGION}

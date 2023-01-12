@@ -14,6 +14,8 @@ public interface TaskRepository {
 
     boolean isExist(String name);
 
+    boolean isExist(Integer id);
+
     Optional<Integer> save(String name, String answersURL, Integer docId);
 
     boolean deleteAllByDocument(Integer id);

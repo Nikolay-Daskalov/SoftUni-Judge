@@ -13,11 +13,11 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
-public class UserDetailsServiceImpl implements UserDetailsService {
+public class UserAuthenticationService implements UserDetailsService {
 
     private final UserAuthenticationRepository userAuthenticationRepository;
 
-    public UserDetailsServiceImpl(UserAuthenticationRepository userAuthenticationRepository) {
+    public UserAuthenticationService(UserAuthenticationRepository userAuthenticationRepository) {
         this.userAuthenticationRepository = userAuthenticationRepository;
     }
 

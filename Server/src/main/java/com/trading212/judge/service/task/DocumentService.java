@@ -1,5 +1,7 @@
 package com.trading212.judge.service.task;
 
+import com.amazonaws.services.s3.AmazonS3;
+import com.amazonaws.services.s3.model.PutObjectResult;
 import com.trading212.judge.model.dto.DocumentDTO;
 import com.trading212.judge.model.dto.DocumentSimpleDTO;
 import com.trading212.judge.model.entity.task.DocumentEntity;
@@ -25,11 +27,13 @@ public class DocumentService {
     private final DocumentRepository documentRepository;
     private final TransactionTemplate transactionTemplate;
     private final TaskService taskService;
+    private final AmazonS3 amazonS3;
 
-    public DocumentService(DocumentRepository documentRepository, TransactionTemplate transactionTemplate, TaskService taskService) {
+    public DocumentService(DocumentRepository documentRepository, TransactionTemplate transactionTemplate, TaskService taskService, AmazonS3 amazonS3) {
         this.documentRepository = documentRepository;
         this.transactionTemplate = transactionTemplate;
         this.taskService = taskService;
+        this.amazonS3 = amazonS3;
     }
 
     public Optional<DocumentDTO> findByID(String name) {
@@ -54,9 +58,11 @@ public class DocumentService {
 
     public Optional<DocumentDTO> create(String name, boolean isTest, DocumentDifficulty difficulty, File file) {
 
-        //TODO: AWS send doc to S3
+        amazonS3.putObject("trading212-judge-submissions", name + ".docx", file);
 
-        Integer docId = documentRepository.save(name, "someURL", difficulty, isTest);
+        String docUrl = amazonS3.getUrl("trading212-judge-submissions", name).toString();
+
+        Integer docId = documentRepository.save(name, docUrl, difficulty, isTest);
 
         if (docId == null) {
             return Optional.empty();

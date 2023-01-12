@@ -79,7 +79,14 @@ public class MariaDBTaskRepositoryImpl implements TaskRepository {
 
     @Override
     public boolean isExist(String name) {
-        Integer result = jdbcTemplate.queryForObject(Queries.IS_EXIST, (rs, rowNum) -> rs.getInt(1), name);
+        Integer result = jdbcTemplate.queryForObject(Queries.IS_EXIST_BY_NAME, (rs, rowNum) -> rs.getInt(1), name);
+
+        return result == 1;
+    }
+
+    @Override
+    public boolean isExist(Integer id) {
+        Integer result = jdbcTemplate.queryForObject(Queries.IS_EXIST_BY_ID, (rs, rowNum) -> rs.getInt(1), id);
 
         return result == 1;
     }
@@ -120,7 +127,13 @@ public class MariaDBTaskRepositoryImpl implements TaskRepository {
                 WHERE d.`id` = ?
                 """, TaskEntity.TABLE_NAME, DocumentEntity.TABLE_NAME);
 
-        private static final String IS_EXIST = String.format("""
+        private static final String IS_EXIST_BY_ID = String.format("""
+                SELECT COUNT(*)
+                FROM `%s`
+                WHERE `id` = ?
+                """, TaskEntity.TABLE_NAME);
+
+        private static final String IS_EXIST_BY_NAME = String.format("""
                 SELECT COUNT(*)
                 FROM `%s`
                 WHERE `name` = ?
