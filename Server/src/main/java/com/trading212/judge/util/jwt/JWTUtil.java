@@ -1,6 +1,6 @@
 package com.trading212.judge.util.jwt;
 
-import com.trading212.judge.model.dto.UserAccessToken;
+import com.trading212.judge.model.dto.user.UserAccessToken;
 
 import java.util.List;
 

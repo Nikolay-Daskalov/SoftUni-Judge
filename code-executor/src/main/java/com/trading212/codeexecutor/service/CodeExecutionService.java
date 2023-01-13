@@ -2,6 +2,8 @@ package com.trading212.codeexecutor.service;
 
 import com.trading212.codeexecutor.enums.CodeResultEnum;
 import com.trading212.codeexecutor.enums.LanguageEnum;
+import com.trading212.codeexecutor.model.dto.CodeResult;
+import com.trading212.codeexecutor.model.dto.ProcessResult;
 import org.springframework.stereotype.Service;
 
 import java.io.*;
@@ -13,41 +15,43 @@ public class CodeExecutionService {
     public CodeExecutionService() {
     }
 
-    public CodeResultEnum execute(String source, LanguageEnum language, List<String> testOutputs, List<String> testInputs) {
+    public CodeResult execute(String source, LanguageEnum language, List<String> testOutputs, List<String> testInputs) {
         try {
             File tempFile = createFile(source);
 
             ProcessService processService = new ProcessService();
-            boolean canRun = processService.checkIfCodeCanRun(tempFile, language);
+            boolean canExecute = processService.checkIfCodeCanRun(tempFile, language);
 
-            if (!canRun) {
+            if (!canExecute) {
                 tempFile.delete();
                 return null;
             }
 
-            List<String> outputs = processService.run(testInputs.toArray(String[]::new));
+            ProcessResult result = processService.run(testInputs.toArray(String[]::new));
 
             tempFile.delete();
             deleteClassFile();
 
-            return checkResult(outputs, testOutputs);
+            return checkResult(result, testOutputs);
         } catch (IOException | InterruptedException e) {
             throw new RuntimeException(e);
         }
     }
 
-    private CodeResultEnum checkResult(List<String> outputs, List<String> testOutputs) {
+    private CodeResult checkResult(ProcessResult processResult, List<String> testOutputs) {
+        List<String> outputs = processResult.outputResults();
+
         if (outputs.size() != testOutputs.size()) {
-            return CodeResultEnum.FAILED;
+            return new CodeResult(CodeResultEnum.UNSOLVED, processResult.executionTime());
         }
 
         for (int i = 0; i < testOutputs.size(); i++) {
             if (!testOutputs.get(i).equals(outputs.get(i))) {
-                return CodeResultEnum.FAILED;
+                return new CodeResult(CodeResultEnum.UNSOLVED, processResult.executionTime());
             }
         }
 
-        return CodeResultEnum.PASSED;
+        return new CodeResult(CodeResultEnum.SOLVED, processResult.executionTime());
     }
 
     private void deleteClassFile() throws IOException, InterruptedException {

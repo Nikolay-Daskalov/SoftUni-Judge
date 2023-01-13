@@ -1,9 +1,8 @@
 package com.trading212.judge.service.task;
 
-import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.model.PutObjectResult;
-import com.trading212.judge.model.dto.DocumentDTO;
-import com.trading212.judge.model.dto.DocumentSimpleDTO;
+import com.trading212.judge.api.CloudStorageAPI;
+import com.trading212.judge.model.dto.task.DocumentDTO;
+import com.trading212.judge.model.dto.task.DocumentSimpleDTO;
 import com.trading212.judge.model.entity.task.DocumentEntity;
 import com.trading212.judge.repository.task.DocumentRepository;
 import com.trading212.judge.service.enums.DocumentDifficulty;
@@ -27,19 +26,13 @@ public class DocumentService {
     private final DocumentRepository documentRepository;
     private final TransactionTemplate transactionTemplate;
     private final TaskService taskService;
-    private final AmazonS3 amazonS3;
+    private final CloudStorageAPI cloudStorageAPI;
 
-    public DocumentService(DocumentRepository documentRepository, TransactionTemplate transactionTemplate, TaskService taskService, AmazonS3 amazonS3) {
+    public DocumentService(DocumentRepository documentRepository, TransactionTemplate transactionTemplate, TaskService taskService, CloudStorageAPI cloudStorageAPI) {
         this.documentRepository = documentRepository;
         this.transactionTemplate = transactionTemplate;
         this.taskService = taskService;
-        this.amazonS3 = amazonS3;
-    }
-
-    public Optional<DocumentDTO> findByID(String name) {
-        Optional<DocumentEntity> docByName = documentRepository.findByName(name);
-
-        return mapToDTO(docByName);
+        this.cloudStorageAPI = cloudStorageAPI;
     }
 
     public Optional<DocumentDTO> findByID(Integer id) {
@@ -56,21 +49,14 @@ public class DocumentService {
         return documentRepository.isExist(id);
     }
 
-    public Optional<DocumentDTO> create(String name, boolean isTest, DocumentDifficulty difficulty, File file) {
+    public DocumentDTO create(String name, boolean isTest, DocumentDifficulty difficulty, File file) {
+        String docObjectKey = cloudStorageAPI.createDocument(name, file);
 
-        amazonS3.putObject("trading212-judge-submissions", name + ".docx", file);
-
-        String docUrl = amazonS3.getUrl("trading212-judge-submissions", name).toString();
-
-        Integer docId = documentRepository.save(name, docUrl, difficulty, isTest);
-
-        if (docId == null) {
-            return Optional.empty();
-        }
+        Integer docId = documentRepository.save(name, docObjectKey, difficulty, isTest);
 
         Optional<DocumentEntity> documentEntity = documentRepository.findById(docId);
 
-        return mapToDTO(documentEntity);
+        return mapToDTO(documentEntity).get();
     }
 
     private Optional<DocumentDTO> mapToDTO(Optional<DocumentEntity> documentEntity) {
@@ -91,7 +77,6 @@ public class DocumentService {
 
         return Optional.of(documentDTO);
     }
-
 
     public Set<DocumentSimpleDTO> getAll() {
         return documentRepository.getAll();

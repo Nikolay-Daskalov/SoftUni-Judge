@@ -1,8 +1,7 @@
 package com.trading212.judge.web.controller;
 
 import com.trading212.judge.model.binding.TaskBindingModel;
-import com.trading212.judge.model.dto.DocumentDTO;
-import com.trading212.judge.model.dto.TaskDTO;
+import com.trading212.judge.model.dto.task.TaskDTO;
 import com.trading212.judge.service.task.DocumentService;
 import com.trading212.judge.service.task.TaskService;
 import com.trading212.judge.util.path.ResourcePathUtil;
@@ -50,9 +49,9 @@ public class TaskController {
             throw new TaskExistException("Task already exists!");
         }
 
-        Optional<DocumentDTO> docByName = documentService.findByID(taskBindingModel.documentName());
+        boolean docExist = documentService.isExist(taskBindingModel.documentId());
 
-        if (docByName.isEmpty()) {
+        if (!docExist) {
             throw new TaskCreationException("Document does not exists");
         }
 
@@ -65,16 +64,12 @@ public class TaskController {
             throw new UnexpectedFailureException("Temp file creation failed");
         }
 
-        Optional<TaskDTO> taskDTO = taskService.create(taskBindingModel.name(), jsonFile, docByName.get().id());
+        TaskDTO taskDTO = taskService.create(taskBindingModel.name(), jsonFile, taskBindingModel.documentId());
 
         jsonFile.delete();
 
-        if (taskDTO.isEmpty()) {
-            throw new ServiceUnavailableException("Task cannot be created.");
-        }
-
-        return ResponseEntity.created(resourcePathUtil.buildResourcePath(httpServletRequest, taskDTO.get().id()))
-                .body(taskDTO.get());
+        return ResponseEntity.created(resourcePathUtil.buildResourcePath(httpServletRequest, taskDTO.id()))
+                .body(taskDTO);
     }
 
     @GetMapping(path = Routes.BY_ID)

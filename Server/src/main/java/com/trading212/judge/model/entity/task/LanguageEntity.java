@@ -8,17 +8,17 @@ import java.util.Objects;
 
 public class LanguageEntity extends BaseEntity {
 
-    public static final String TABLE_NAME = "languages";
+    public static final String TABLE_NAME = "code_languages";
 
-    private final CodeLanguageEnum codeLanguageEnum;
+    private final CodeLanguageEnum name;
 
-    public LanguageEntity(Integer id, Instant createdAt, CodeLanguageEnum codeLanguageEnum) {
+    public LanguageEntity(Integer id, Instant createdAt, CodeLanguageEnum name) {
         super(id, createdAt);
-        this.codeLanguageEnum = codeLanguageEnum;
+        this.name = name;
     }
 
     public CodeLanguageEnum getLanguageEnum() {
-        return codeLanguageEnum;
+        return name;
     }
 
     @Override
@@ -26,11 +26,11 @@ public class LanguageEntity extends BaseEntity {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         LanguageEntity that = (LanguageEntity) o;
-        return codeLanguageEnum == that.codeLanguageEnum;
+        return name == that.name;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(codeLanguageEnum);
+        return Objects.hash(name);
     }
 }

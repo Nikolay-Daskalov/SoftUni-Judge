@@ -1,7 +1,7 @@
 package com.trading212.judge.web.controller;
 
 import com.trading212.judge.model.binding.UserRegistrationBindingModel;
-import com.trading212.judge.model.dto.UserRegistrationDTO;
+import com.trading212.judge.model.dto.user.UserRegistrationDTO;
 import com.trading212.judge.service.user.UserService;
 import com.trading212.judge.web.exception.user.UserExistException;
 import com.trading212.judge.web.exception.user.UserRegistrationException;

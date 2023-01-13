@@ -1,4 +1,4 @@
-package com.trading212.judge.model.dto;
+package com.trading212.judge.model.dto.user;
 
 public record UserDTO(
         Integer id,

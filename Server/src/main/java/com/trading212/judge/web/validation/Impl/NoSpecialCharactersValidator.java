@@ -17,6 +17,10 @@ public class NoSpecialCharactersValidator implements ConstraintValidator<NoSpeci
 
     @Override
     public boolean isValid(String value, ConstraintValidatorContext context) {
+        if (value == null) {
+            return true;
+        }
+
         return value.chars().noneMatch(character -> Character.isWhitespace(character) || specialCharacters.contains((char) character));
     }
 }

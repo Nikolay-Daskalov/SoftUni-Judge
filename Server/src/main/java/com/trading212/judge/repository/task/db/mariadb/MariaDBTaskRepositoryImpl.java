@@ -1,13 +1,12 @@
 package com.trading212.judge.repository.task.db.mariadb;
 
-import com.trading212.judge.model.dto.TaskSimpleDTO;
+import com.trading212.judge.model.dto.task.TaskSimpleDTO;
 import com.trading212.judge.model.entity.task.DocumentEntity;
 import com.trading212.judge.model.entity.task.TaskEntity;
 import com.trading212.judge.repository.task.TaskRepository;
 import com.trading212.judge.service.enums.DocumentDifficulty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
@@ -92,23 +91,19 @@ public class MariaDBTaskRepositoryImpl implements TaskRepository {
     }
 
     @Override
-    public Optional<Integer> save(String name, String answersURL, Integer docId) {
-        try {
-            KeyHolder keyHolder = new GeneratedKeyHolder();
-            jdbcTemplate.update(con -> {
-                PreparedStatement ps = con.prepareStatement(Queries.CREATE, Statement.RETURN_GENERATED_KEYS);
+    public Integer save(String name, String answersURL, Integer docId) {
+        KeyHolder keyHolder = new GeneratedKeyHolder();
+        jdbcTemplate.update(con -> {
+            PreparedStatement ps = con.prepareStatement(Queries.CREATE, Statement.RETURN_GENERATED_KEYS);
 
-                ps.setString(1, name);
-                ps.setString(2, answersURL);
-                ps.setInt(3, docId);
+            ps.setString(1, name);
+            ps.setString(2, answersURL);
+            ps.setInt(3, docId);
 
-                return ps;
-            }, keyHolder);
+            return ps;
+        }, keyHolder);
 
-            return Optional.of(keyHolder.getKey().intValue());
-        } catch (DataAccessException ignored) {
-            return Optional.empty();
-        }
+        return keyHolder.getKey().intValue();
     }
 
     @Override

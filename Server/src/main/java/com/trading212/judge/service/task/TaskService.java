@@ -1,9 +1,9 @@
 package com.trading212.judge.service.task;
 
 import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.model.PutObjectResult;
-import com.trading212.judge.model.dto.TaskDTO;
-import com.trading212.judge.model.dto.TaskSimpleDTO;
+import com.trading212.judge.api.CloudStorageAPI;
+import com.trading212.judge.model.dto.task.TaskDTO;
+import com.trading212.judge.model.dto.task.TaskSimpleDTO;
 import com.trading212.judge.model.entity.task.TaskEntity;
 import com.trading212.judge.repository.task.TaskRepository;
 import org.springframework.stereotype.Service;
@@ -17,10 +17,12 @@ public class TaskService {
 
     private final TaskRepository taskRepository;
     private final AmazonS3 amazonS3;
+    private final CloudStorageAPI cloudStorageAPI;
 
-    public TaskService(TaskRepository taskRepository, AmazonS3 amazonS3) {
+    public TaskService(TaskRepository taskRepository, AmazonS3 amazonS3, CloudStorageAPI cloudStorageAPI) {
         this.taskRepository = taskRepository;
         this.amazonS3 = amazonS3;
+        this.cloudStorageAPI = cloudStorageAPI;
     }
 
     public Set<TaskSimpleDTO> findAllByDocument(Integer id) {
@@ -35,21 +37,14 @@ public class TaskService {
         return taskRepository.isExist(id);
     }
 
-    public Optional<TaskDTO> create(String taskName, File file, Integer docId) {
+    public TaskDTO create(String name, File file, Integer docId) {
+        String answersObjectKey = cloudStorageAPI.createAnswers(name, file);
 
-        amazonS3.putObject("trading212-judge-submissions", taskName + "-answers.json", file);
+        Integer taskId = taskRepository.save(name, answersObjectKey, docId);
 
-        String taskAnswersURL = amazonS3.getUrl("trading212-judge-submissions", taskName).toString();
+        Optional<TaskEntity> taskById = taskRepository.findById(taskId);
 
-        Optional<Integer> savedTask = taskRepository.save(taskName, taskAnswersURL, docId);
-
-        if (savedTask.isEmpty()) {
-            return Optional.empty();
-        }
-
-        Optional<TaskEntity> taskById = taskRepository.findById(savedTask.get());
-
-        return mapTask(taskById);
+        return mapTask(taskById).get();
     }
 
     private Optional<TaskDTO> mapTask(Optional<TaskEntity> taskEntity) {

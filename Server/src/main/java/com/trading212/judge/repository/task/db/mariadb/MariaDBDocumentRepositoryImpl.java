@@ -1,6 +1,6 @@
 package com.trading212.judge.repository.task.db.mariadb;
 
-import com.trading212.judge.model.dto.DocumentSimpleDTO;
+import com.trading212.judge.model.dto.task.DocumentSimpleDTO;
 import com.trading212.judge.model.entity.task.DocumentEntity;
 import com.trading212.judge.repository.task.DocumentRepository;
 import com.trading212.judge.service.enums.DocumentDifficulty;
@@ -27,12 +27,10 @@ public class MariaDBDocumentRepositoryImpl implements DocumentRepository {
 
     private final JdbcTemplate jdbcTemplate;
     private final TransactionTemplate transactionTemplate;
-    private final MariaDBTaskRepositoryImpl mariaDBTaskRepository;
 
-    public MariaDBDocumentRepositoryImpl(JdbcTemplate jdbcTemplate, TransactionTemplate transactionTemplate, MariaDBTaskRepositoryImpl mariaDBTaskRepository) {
+    public MariaDBDocumentRepositoryImpl(JdbcTemplate jdbcTemplate, TransactionTemplate transactionTemplate) {
         this.jdbcTemplate = jdbcTemplate;
         this.transactionTemplate = transactionTemplate;
-        this.mariaDBTaskRepository = mariaDBTaskRepository;
     }
 
 
@@ -76,7 +74,7 @@ public class MariaDBDocumentRepositoryImpl implements DocumentRepository {
         DocumentEntity documentEntity = jdbcTemplate.query(Queries.FIND_BY_ID, (rs) -> {
             if (!rs.next()) {
                 return null;
-            }//TODO: check if works
+            }
 
             return new DocumentEntity.Builder()
                     .setId(rs.getInt(1))

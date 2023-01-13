@@ -1,9 +1,9 @@
 package com.trading212.judge.web.controller;
 
 import com.trading212.judge.model.binding.DocumentBindingModel;
-import com.trading212.judge.model.dto.DocumentDTO;
-import com.trading212.judge.model.dto.DocumentSimpleDTO;
-import com.trading212.judge.model.dto.TaskSimpleDTO;
+import com.trading212.judge.model.dto.task.DocumentDTO;
+import com.trading212.judge.model.dto.task.DocumentSimpleDTO;
+import com.trading212.judge.model.dto.task.TaskSimpleDTO;
 import com.trading212.judge.service.task.DocumentService;
 import com.trading212.judge.util.path.ResourcePathUtil;
 import com.trading212.judge.web.exception.ServiceUnavailableException;
@@ -68,17 +68,13 @@ public class DocumentController {
             throw new UnexpectedFailureException("Temp file creation exception");
         }
 
-        Optional<DocumentDTO> document = documentService.create(documentBindingModel.name(), documentBindingModel.isTest(),
+        DocumentDTO document = documentService.create(documentBindingModel.name(), documentBindingModel.isTest(),
                 documentBindingModel.difficulty(), tempDocFile);
 
         tempDocFile.delete();
 
-        if (document.isEmpty()) {
-            throw new ServiceUnavailableException("Service is shut down temporarily.");
-        }
-
-        return ResponseEntity.created(resourcePathUtil.buildResourcePath(httpServletRequest, document.get().id()))
-                .body(document.get());
+        return ResponseEntity.created(resourcePathUtil.buildResourcePath(httpServletRequest, document.id()))
+                .body(document);
     }
 
     @DeleteMapping(path = Routes.BY_ID)
@@ -113,6 +109,12 @@ public class DocumentController {
     public ResponseEntity<Set<TaskSimpleDTO>> findAllTasksSimple(@PathVariable Integer id) {
         if (id <= 0) {
             throw new DocumentDataException("Invalid data!");
+        }
+
+        boolean exist = documentService.isExist(id);
+
+        if (!exist) {
+            throw new DocumentNotFoundException("Document does not exist!");
         }
 
         Set<TaskSimpleDTO> allByDocumentId = taskService.findAllByDocument(id);

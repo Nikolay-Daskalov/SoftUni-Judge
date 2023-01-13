@@ -11,6 +11,10 @@ spring:
         password: ${DB_PASSWORD}
         default-schema: ${DB_SCHEMA}
         locations: classpath:db/migration
+    jackson:
+        serialization:
+            write-dates-as-timestamps: true
+            write-date-timestamps-as-nanoseconds: false
 #    cache:
 #        type: redis
 #    data:

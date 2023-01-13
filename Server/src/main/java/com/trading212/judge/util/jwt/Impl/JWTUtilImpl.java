@@ -6,7 +6,7 @@ import com.auth0.jwt.JWTVerifier;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.interfaces.DecodedJWT;
-import com.trading212.judge.model.dto.UserAccessToken;
+import com.trading212.judge.model.dto.user.UserAccessToken;
 import com.trading212.judge.util.jwt.JWTUtil;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -33,14 +33,12 @@ public class JWTUtilImpl implements JWTUtil {
 
     @Override
     public String createAccessToken(String sub, List<String> roles) {
-        String accessToken = JWTBuilder
+        return JWTBuilder
                 .withSubject(sub)
                 .withClaim(ROLES_CLAIM, roles)
                 .withExpiresAt(getExpirationTime())
                 .withIssuedAt(Instant.now())
                 .sign(algorithm);
-
-        return accessToken;
     }
 
     @Override

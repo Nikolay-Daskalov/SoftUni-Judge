@@ -1,4 +1,4 @@
-package com.trading212.codeexecutor.enums;
+package com.trading212.judge.service.enums;
 
 public enum CodeResultEnum {
     SOLVED, UNSOLVED

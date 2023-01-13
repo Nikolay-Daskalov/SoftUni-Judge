@@ -13,7 +13,7 @@ VALUES
 (1, 1),
 (1, 2);
 
-INSERT INTO `languages` (`name`)
+INSERT INTO `code_languages` (`name`)
 VALUES
 ('JAVA'),
 ('JAVASCRIPT');

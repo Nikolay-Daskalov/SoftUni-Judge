@@ -1,9 +1,11 @@
 package com.trading212.judge.web.controller;
 
 import com.trading212.judge.model.binding.CodeBindingModel;
+import com.trading212.judge.model.dto.task.CodeResultDTO;
 import com.trading212.judge.service.task.CodeExecutionService;
-import com.trading212.judge.service.task.TaskService;
-import com.trading212.judge.service.user.UserService;
+import com.trading212.judge.util.path.ResourcePathUtil;
+import com.trading212.judge.web.exception.task.CodeCannotBeExecutedException;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
@@ -21,26 +23,30 @@ import static com.trading212.judge.web.controller.CodeExecutionController.Routes
 public class CodeExecutionController {
 
     private final CodeExecutionService codeExecutionService;
+    private final ResourcePathUtil resourcePathUtil;
 
-    public CodeExecutionController(CodeExecutionService codeExecutionService) {
+    public CodeExecutionController(CodeExecutionService codeExecutionService, ResourcePathUtil resourcePathUtil) {
         this.codeExecutionService = codeExecutionService;
+        this.resourcePathUtil = resourcePathUtil;
     }
 
 
     @PostMapping
-    public ResponseEntity<?> uploadCode(@RequestBody @Valid CodeBindingModel codeBindingModel, BindingResult bindingResult, Principal principal) {
+    public ResponseEntity<CodeResultDTO> uploadCode(@RequestBody @Valid CodeBindingModel codeBindingModel,
+                                                    BindingResult bindingResult, Principal principal, HttpServletRequest httpServletRequest) {
 
         if (bindingResult.hasErrors()) {
             return ResponseEntity.badRequest().build();
         }
 
-        Boolean codeResult = codeExecutionService.execute(codeBindingModel.sourceCode(), codeBindingModel.codeLanguage(), codeBindingModel.taskId(), principal.getName());
+        CodeResultDTO codeResultDTO = codeExecutionService.execute(codeBindingModel.sourceCode(), codeBindingModel.codeLanguage(), codeBindingModel.taskId(), "Admin");//TODO:
 
-        if (codeResult == null) {
-            throw new RuntimeException();//TODO
+        if (codeResultDTO == null) {
+            throw new CodeCannotBeExecutedException("Code cannot be executed");
         }
 
-        return ResponseEntity.notFound().build();
+        return ResponseEntity.created(resourcePathUtil.buildResourcePath(httpServletRequest, codeResultDTO.id()))
+                .body(codeResultDTO);
     }
 
 

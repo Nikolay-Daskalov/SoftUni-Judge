@@ -1,4 +1,4 @@
-package com.trading212.judge.model.dto;
+package com.trading212.judge.model.dto.task;
 
 import java.time.Instant;
 

@@ -1,8 +1,10 @@
 package com.trading212.judge.service.user;
 
-import com.trading212.judge.model.dto.UserRegistrationDTO;
+import com.trading212.judge.model.dto.user.UserRegistrationDTO;
 import com.trading212.judge.repository.user.UserRepository;
 import org.springframework.stereotype.Service;
+
+import java.util.Optional;
 
 @Service
 public class UserService {
@@ -24,5 +26,9 @@ public class UserService {
         Integer standardRoleId = roleService.getStandard();
 
         return userRepository.register(userRegistrationDTO.username(), userRegistrationDTO.email(), userRegistrationDTO.password(), standardRoleId);
+    }
+
+    public Optional<Integer> getIdByUsername(String username) {
+        return userRepository.getIdByUsername(username);
     }
 }

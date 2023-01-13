@@ -1,8 +1,12 @@
 package com.trading212.codeexecutor.service;
 
 import com.trading212.codeexecutor.enums.LanguageEnum;
+import com.trading212.codeexecutor.model.dto.CodeResult;
+import com.trading212.codeexecutor.model.dto.ProcessResult;
 
 import java.io.*;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -48,13 +52,18 @@ public class ProcessService {
         }
     }
 
-    public List<String> run(String... input) {
+    public ProcessResult run(String... input) {
         try {
+            Instant startTime = Instant.now();
+
             Process startProcessExecution = processBuilder.start();
 
             BufferedWriter bufferedWriter = new BufferedWriter(new OutputStreamWriter(startProcessExecution.getOutputStream()));
 
             for (String currentInput : input) {
+                if (currentInput == null) {
+                    continue;//TODO:
+                }
                 bufferedWriter.write(currentInput);
                 bufferedWriter.newLine();
             }
@@ -62,6 +71,8 @@ public class ProcessService {
             bufferedWriter.close();
 
             startProcessExecution.waitFor(MAX_EXECUTION_TIME_SECONDS, TIME_UNIT);
+
+            Instant endTime = Instant.now();
 
             if (startProcessExecution.exitValue() != 0) {
                 return null;
@@ -80,7 +91,9 @@ public class ProcessService {
             startProcessExecution.destroyForcibly();
             bufferedReader.close();
 
-            return outputs;
+            long executionTimeMillis = startTime.until(endTime, ChronoUnit.MILLIS);
+
+            return new ProcessResult(outputs, String.valueOf(executionTimeMillis / 1000.0));
         } catch (IOException | InterruptedException e) {
             throw new RuntimeException(e);
         }

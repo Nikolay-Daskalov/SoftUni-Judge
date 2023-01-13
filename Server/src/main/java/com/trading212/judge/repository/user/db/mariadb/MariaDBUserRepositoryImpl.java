@@ -18,6 +18,7 @@ import org.springframework.transaction.support.TransactionTemplate;
 import java.math.BigInteger;
 import java.sql.PreparedStatement;
 import java.sql.Statement;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 
 
@@ -75,6 +76,16 @@ public class MariaDBUserRepositoryImpl implements UserRepository {
         return existCount == 1;
     }
 
+    @Override
+    public Optional<Integer> getIdByUsername(String username) {
+        return jdbcTemplate.query(Queries.GET_ID_BY_USERNAME, (rs) -> {
+            if (!rs.next()) {
+                return Optional.empty();
+            }
+            return Optional.of(rs.getInt(1));
+        }, username);
+    }
+
     private static class Queries {
         private static final String USERS_ROLES_TABLE_NAME = "users_roles";
 
@@ -95,5 +106,11 @@ public class MariaDBUserRepositoryImpl implements UserRepository {
                 VALUE
                 (?, ?)
                 """, USERS_ROLES_TABLE_NAME);
+
+        private static final String GET_ID_BY_USERNAME = String.format("""
+                SELECT `id`
+                FROM `%s`
+                WHERE `username` = ?
+                """, UserEntity.TABLE_NAME);
     }
 }

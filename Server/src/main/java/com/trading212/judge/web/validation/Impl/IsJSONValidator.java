@@ -1,6 +1,7 @@
 package com.trading212.judge.web.validation.Impl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.trading212.judge.model.dto.task.TaskAnswersJSON;
 import com.trading212.judge.web.validation.IsJSON;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
@@ -10,7 +11,6 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.util.List;
 
 @Component
 public class IsJSONValidator implements ConstraintValidator<IsJSON, MultipartFile> {
@@ -58,11 +58,4 @@ public class IsJSONValidator implements ConstraintValidator<IsJSON, MultipartFil
             return false;
         }
     }
-
-    public record TaskAnswersJSON(List<AnswerCases> cases) {
-    }
-
-    public record AnswerCases(String input, String output) {
-    }
-
 }

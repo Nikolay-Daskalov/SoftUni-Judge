@@ -1,8 +1,7 @@
 package com.trading212.judge.model.entity.task;
 
-import com.trading212.judge.model.entity.task.enums.SubmissionResultEnum;
-import com.trading212.judge.model.entity.user.UserEntity;
 import com.trading212.judge.model.entity.base.BaseEntity;
+import com.trading212.judge.service.enums.CodeResultEnum;
 
 import java.time.Instant;
 import java.util.Objects;
@@ -11,33 +10,33 @@ public class SubmissionEntity extends BaseEntity {
 
     public static final String TABLE_NAME = "submissions";
 
-    private TaskEntity task;
-    private UserEntity user;
-    private SubmissionResultEnum result;
-    private LanguageEntity category;
-    private Double executionTime;
+    private Integer taskId;
+    private Integer userId;
+    private CodeResultEnum result;
+    private Integer codeLanguageId;
+    private String executionTime;
 
     public SubmissionEntity() {
         super(null, null);
     }
 
-    public TaskEntity getTask() {
-        return task;
+    public Integer getTaskId() {
+        return taskId;
     }
 
-    public UserEntity getUser() {
-        return user;
+    public Integer getUserId() {
+        return userId;
     }
 
-    public SubmissionResultEnum getResult() {
+    public CodeResultEnum getResult() {
         return result;
     }
 
-    public LanguageEntity getCategory() {
-        return category;
+    public Integer getCodeLanguageId() {
+        return codeLanguageId;
     }
 
-    public Double getExecutionTime() {
+    public String getExecutionTime() {
         return executionTime;
     }
 
@@ -46,12 +45,12 @@ public class SubmissionEntity extends BaseEntity {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         SubmissionEntity that = (SubmissionEntity) o;
-        return task.equals(that.task) && user.equals(that.user) && result == that.result && category.equals(that.category) && executionTime.equals(that.executionTime);
+        return taskId.equals(that.taskId) && userId.equals(that.userId) && result == that.result && codeLanguageId.equals(that.codeLanguageId) && executionTime.equals(that.executionTime);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(task, user, result, category, executionTime);
+        return Objects.hash(taskId, userId, result, codeLanguageId, executionTime);
     }
 
     public static class Builder {
@@ -66,27 +65,27 @@ public class SubmissionEntity extends BaseEntity {
             return this;
         }
 
-        public Builder setExercise(TaskEntity task) {
-            submission.task = task;
+        public Builder setTaskId(Integer taskId) {
+            submission.taskId = taskId;
             return this;
         }
 
-        public Builder setUser(UserEntity user) {
-            submission.user = user;
+        public Builder setUserId(Integer userId) {
+            submission.userId = userId;
             return this;
         }
 
-        public Builder setResult(SubmissionResultEnum result) {
+        public Builder setResult(CodeResultEnum result) {
             submission.result = result;
             return this;
         }
 
-        public Builder setCategory(LanguageEntity category) {
-            submission.category = category;
+        public Builder setCodeLanguageId(Integer codeLanguageId) {
+            submission.codeLanguageId = codeLanguageId;
             return this;
         }
 
-        public Builder setExecutionTime(Double executionTime) {
+        public Builder setExecutionTime(String executionTime) {
             submission.executionTime = executionTime;
             return this;
         }

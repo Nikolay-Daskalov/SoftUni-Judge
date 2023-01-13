@@ -2,6 +2,7 @@ package com.trading212.codeexecutor.controller;
 
 import com.trading212.codeexecutor.enums.CodeResultEnum;
 import com.trading212.codeexecutor.model.binding.CodeDataBindingModel;
+import com.trading212.codeexecutor.model.dto.CodeResult;
 import com.trading212.codeexecutor.model.view.CodeExecutionResultViewModel;
 import com.trading212.codeexecutor.service.CodeExecutionService;
 import org.springframework.http.ResponseEntity;
@@ -26,13 +27,17 @@ public class CodeExecutionController {
     @PostMapping
     public ResponseEntity<CodeExecutionResultViewModel> postCode(@RequestBody CodeDataBindingModel codeDataBindingModel) {
 
-        CodeResultEnum executionResult = codeExecutionService.execute(
+        CodeResult codeResult = codeExecutionService.execute(
                 codeDataBindingModel.code(),
                 codeDataBindingModel.language(),
                 codeDataBindingModel.testOutputs(),
                 codeDataBindingModel.testInputs());
 
-        CodeExecutionResultViewModel codeExecutionResultViewModel = new CodeExecutionResultViewModel(executionResult);
+        if (codeResult == null) {
+            return ResponseEntity.badRequest().build();
+        }
+
+        CodeExecutionResultViewModel codeExecutionResultViewModel = new CodeExecutionResultViewModel(codeResult.codeResult(), codeResult.executionTime());
 
         return ResponseEntity.ok(codeExecutionResultViewModel);
     }
