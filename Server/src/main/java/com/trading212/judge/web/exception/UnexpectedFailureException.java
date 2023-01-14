@@ -5,7 +5,10 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 
 @ResponseStatus(code = HttpStatus.INTERNAL_SERVER_ERROR)
 public class UnexpectedFailureException extends RuntimeException {
-    public UnexpectedFailureException(String message) {
-        super(message);
+
+    private final static String MESSAGE = "Oops! Something went wrong.";
+
+    public UnexpectedFailureException() {
+        super(MESSAGE);
     }
 }

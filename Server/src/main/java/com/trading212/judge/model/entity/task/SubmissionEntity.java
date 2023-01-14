@@ -45,12 +45,12 @@ public class SubmissionEntity extends BaseEntity {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         SubmissionEntity that = (SubmissionEntity) o;
-        return taskId.equals(that.taskId) && userId.equals(that.userId) && result == that.result && codeLanguageId.equals(that.codeLanguageId) && executionTime.equals(that.executionTime);
+        return id.equals(that.id) && taskId.equals(that.taskId) && userId.equals(that.userId) && result == that.result && codeLanguageId.equals(that.codeLanguageId) && executionTime.equals(that.executionTime);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(taskId, userId, result, codeLanguageId, executionTime);
+        return Objects.hash(id, taskId, userId, result, codeLanguageId, executionTime);
     }
 
     public static class Builder {

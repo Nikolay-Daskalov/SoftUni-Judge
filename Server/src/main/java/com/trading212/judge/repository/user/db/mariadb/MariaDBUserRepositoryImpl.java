@@ -61,12 +61,12 @@ public class MariaDBUserRepositoryImpl implements UserRepository {
                     jdbcTemplate.update(Queries.SET_STANDARD_ROLE, userId.intValue(), standardRoleId);
                 }
             });
+
+            return true;
         } catch (TransactionException | DataAccessException ignored) {
             LOGGER.error("Transaction failed to insert a new user!");
             return false;
         }
-
-        return true;
     }
 
     @Override

@@ -4,7 +4,7 @@ import com.trading212.judge.model.binding.CodeBindingModel;
 import com.trading212.judge.model.dto.task.CodeResultDTO;
 import com.trading212.judge.service.task.CodeExecutionService;
 import com.trading212.judge.util.path.ResourcePathUtil;
-import com.trading212.judge.web.exception.task.CodeCannotBeExecutedException;
+import com.trading212.judge.web.exception.InvalidRequestException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
@@ -36,13 +36,13 @@ public class CodeExecutionController {
                                                     BindingResult bindingResult, Principal principal, HttpServletRequest httpServletRequest) {
 
         if (bindingResult.hasErrors()) {
-            return ResponseEntity.badRequest().build();
+            throw new InvalidRequestException();
         }
 
         CodeResultDTO codeResultDTO = codeExecutionService.execute(codeBindingModel.sourceCode(), codeBindingModel.codeLanguage(), codeBindingModel.taskId(), "Admin");//TODO:
 
         if (codeResultDTO == null) {
-            throw new CodeCannotBeExecutedException("Code cannot be executed");
+            throw new InvalidRequestException();
         }
 
         return ResponseEntity.created(resourcePathUtil.buildResourcePath(httpServletRequest, codeResultDTO.id()))

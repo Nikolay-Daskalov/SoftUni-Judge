@@ -2,10 +2,12 @@ package com.trading212.judge.service.task;
 
 import com.trading212.judge.api.CloudStorageAPI;
 import com.trading212.judge.model.dto.task.DocumentDTO;
+import com.trading212.judge.model.dto.task.DocumentPageable;
 import com.trading212.judge.model.dto.task.DocumentSimpleDTO;
 import com.trading212.judge.model.entity.task.DocumentEntity;
 import com.trading212.judge.repository.task.DocumentRepository;
 import com.trading212.judge.service.enums.DocumentDifficulty;
+import com.trading212.judge.service.enums.PageableDirectionEnum;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -38,7 +40,12 @@ public class DocumentService {
     public Optional<DocumentDTO> findByID(Integer id) {
         Optional<DocumentEntity> documentEntity = documentRepository.findById(id);
 
-        return mapToDTO(documentEntity);
+        if (documentEntity.isEmpty()) {
+            return Optional.empty();
+        }
+
+        String docURL = cloudStorageAPI.getObjectURL(documentEntity.get().getUrl());
+        return mapToDTO(documentEntity, docURL);
     }
 
     public boolean isExist(String name) {
@@ -50,16 +57,21 @@ public class DocumentService {
     }
 
     public DocumentDTO create(String name, boolean isTest, DocumentDifficulty difficulty, File file) {
+        boolean docExist = documentRepository.isExist(name);
+        if (docExist) {
+            return null;
+        }
+
         String docObjectKey = cloudStorageAPI.createDocument(name, file);
 
         Integer docId = documentRepository.save(name, docObjectKey, difficulty, isTest);
-
         Optional<DocumentEntity> documentEntity = documentRepository.findById(docId);
+        String docURL = cloudStorageAPI.getObjectURL(documentEntity.get().getUrl());
 
-        return mapToDTO(documentEntity).get();
+        return mapToDTO(documentEntity, docURL).get();
     }
 
-    private Optional<DocumentDTO> mapToDTO(Optional<DocumentEntity> documentEntity) {
+    private Optional<DocumentDTO> mapToDTO(Optional<DocumentEntity> documentEntity, String docURL) {
         if (documentEntity.isEmpty()) {
             return Optional.empty();
         }
@@ -69,7 +81,7 @@ public class DocumentService {
         DocumentDTO documentDTO = new DocumentDTO(
                 entity.getId(),
                 entity.getName(),
-                entity.getUrl(),
+                docURL,
                 entity.getDifficulty(),
                 entity.isTest(),
                 entity.getCreatedAt()
@@ -78,8 +90,12 @@ public class DocumentService {
         return Optional.of(documentDTO);
     }
 
-    public Set<DocumentSimpleDTO> getAll() {
-        return documentRepository.getAll();
+    public DocumentPageable getAllPageable(Integer pageNumber) {
+        if (pageNumber < 0) {
+            return null;
+        }
+
+        return documentRepository.getAllPageable(pageNumber);
     }
 
     public boolean delete(Integer id) {

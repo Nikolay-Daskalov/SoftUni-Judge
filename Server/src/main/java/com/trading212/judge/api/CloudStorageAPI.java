@@ -9,4 +9,6 @@ public interface CloudStorageAPI {
     String createAnswers(String name, File file);
 
     File getAnswersObject(String objectKey);
+
+    String getObjectURL(String objectKey);
 }

@@ -13,6 +13,7 @@ import java.io.IOException;
 public class AWSCloudStorageAPI implements CloudStorageAPI {
 
     private static final String BUCKET = "trading212-judge-submissions";
+    private static final String URL = "https://trading212-judge-submissions.s3.eu-west-3.amazonaws.com/";
 
     private final AmazonS3 amazonS3;
 
@@ -58,5 +59,10 @@ public class AWSCloudStorageAPI implements CloudStorageAPI {
         }
 
         return file;
+    }
+
+    @Override
+    public String getObjectURL(String objectKey) {
+        return URL + objectKey;
     }
 }

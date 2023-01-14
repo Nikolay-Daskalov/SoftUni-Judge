@@ -16,12 +16,10 @@ import java.util.Set;
 public class TaskService {
 
     private final TaskRepository taskRepository;
-    private final AmazonS3 amazonS3;
     private final CloudStorageAPI cloudStorageAPI;
 
-    public TaskService(TaskRepository taskRepository, AmazonS3 amazonS3, CloudStorageAPI cloudStorageAPI) {
+    public TaskService(TaskRepository taskRepository, CloudStorageAPI cloudStorageAPI) {
         this.taskRepository = taskRepository;
-        this.amazonS3 = amazonS3;
         this.cloudStorageAPI = cloudStorageAPI;
     }
 

@@ -1,5 +1,6 @@
 package com.trading212.judge.repository.task.db.mariadb;
 
+import com.trading212.judge.model.dto.task.DocumentPageable;
 import com.trading212.judge.model.dto.task.DocumentSimpleDTO;
 import com.trading212.judge.model.entity.task.DocumentEntity;
 import com.trading212.judge.repository.task.DocumentRepository;
@@ -35,18 +36,22 @@ public class MariaDBDocumentRepositoryImpl implements DocumentRepository {
 
 
     @Override
-    public Set<DocumentSimpleDTO> getAll() {
+    public DocumentPageable getAllPageable(Integer pageNumber) {
         Set<DocumentSimpleDTO> documents = new LinkedHashSet<>();
 
-        jdbcTemplate.query(Queries.GET_ALL, rs -> {
+        jdbcTemplate.query(Queries.GET_ALL_PAGEABLE, rs -> {
             int id = rs.getInt(1);
             String name = rs.getString(2);
             DocumentDifficulty difficulty = DocumentDifficulty.valueOf(rs.getString(3));
+            boolean isTest = rs.getBoolean(4);
 
-            documents.add(new DocumentSimpleDTO(id, name, difficulty));
-        });
+            documents.add(new DocumentSimpleDTO(id, name, difficulty, isTest));
+        }, Queries.PAGE_SIZE * pageNumber);
 
-        return documents;
+        Integer rowCount = jdbcTemplate.queryForObject(Queries.DB_ROWS_COUNT, (rs, rowNum) -> rs.getInt(1));
+        Integer totalPages = (int) Math.ceil(rowCount / (Queries.PAGE_SIZE * 1.0));
+
+        return new DocumentPageable(documents, totalPages);
     }
 
     @Override
@@ -132,9 +137,18 @@ public class MariaDBDocumentRepositoryImpl implements DocumentRepository {
     }
 
     private static class Queries {
-        private static final String GET_ALL = String.format("""
-                SELECT d.`id`, d.`name`, d.`difficulty`
-                FROM `%s`AS d
+
+        private static final Integer PAGE_SIZE = 8;
+        private static final String GET_ALL_PAGEABLE = String.format("""
+                SELECT `id`, `name`, `difficulty`, `is_test`
+                FROM `%s`
+                ORDER BY `id` ASC
+                LIMIT %d OFFSET ?
+                """, DocumentEntity.TABLE_NAME, PAGE_SIZE);
+
+        private static final String DB_ROWS_COUNT = String.format("""
+                SELECT COUNT(`id`)
+                FROM `%s`
                 """, DocumentEntity.TABLE_NAME);
 
         private static final String FIND_BY_NAME = String.format("""

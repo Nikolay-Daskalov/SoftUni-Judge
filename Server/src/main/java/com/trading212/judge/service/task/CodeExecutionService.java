@@ -5,6 +5,8 @@ import com.trading212.judge.api.CloudStorageAPI;
 import com.trading212.judge.model.dto.task.*;
 import com.trading212.judge.model.entity.task.enums.CodeLanguageEnum;
 import com.trading212.judge.service.user.UserService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.io.*;
@@ -14,6 +16,8 @@ import java.util.Optional;
 
 @Service
 public class CodeExecutionService {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(CodeExecutionService.class);
 
     private final ExecutorServiceAPI executorServiceAPI;
     private final TaskService taskService;
@@ -50,7 +54,11 @@ public class CodeExecutionService {
         }
 
         File file = cloudStorageAPI.getAnswersObject(taskById.get().answersURL());
-        TaskAnswersJSON taskAnswersJSON = mapFile(file);
+        TaskAnswersJSON taskAnswersJSON = mapFileToPOJO(file);
+
+        if (taskAnswersJSON == null) {
+            return null;
+        }
 
         List<String> testInputs = new ArrayList<>();
         List<String> testOutputs = new ArrayList<>();
@@ -59,12 +67,12 @@ public class CodeExecutionService {
             testOutputs.add(answerCase.output());
         }
 
-        CodeResultBindingModel codeResult = executorServiceAPI.sendCode(sourceCode, codeLanguage, testInputs, testOutputs);
+        CodeResultBindingModel codeResult = executorServiceAPI.sendCode(sourceCode, codeLanguage, testOutputs, testInputs);
         if (codeResult == null) {
             return null;
         }
 
-        Integer submissionId = submissionService.submit(codeLanguageId.get(), codeResult.codeResult(), userId.get(), taskId, codeResult.executionTime());
+        Integer submissionId = submissionService.save(codeLanguageId.get(), codeResult.codeResult(), userId.get(), taskId, codeResult.executionTime());
         return mapSubmissionDTO(submissionService.findById(submissionId).get());
     }
 
@@ -76,13 +84,14 @@ public class CodeExecutionService {
         );
     }
 
-    private TaskAnswersJSON mapFile(File file) {
+    private TaskAnswersJSON mapFileToPOJO(File file) {
         TaskAnswersJSON taskAnswersJSON = null;
 
         try {
             taskAnswersJSON = objectMapper.readValue(file, TaskAnswersJSON.class);
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            LOGGER.error("JSON file cannot be mapped to POJO.");
+            return null;
         }
 
         return taskAnswersJSON;

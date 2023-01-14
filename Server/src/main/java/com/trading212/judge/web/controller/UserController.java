@@ -3,9 +3,11 @@ package com.trading212.judge.web.controller;
 import com.trading212.judge.model.binding.UserRegistrationBindingModel;
 import com.trading212.judge.model.dto.user.UserRegistrationDTO;
 import com.trading212.judge.service.user.UserService;
-import com.trading212.judge.web.exception.user.UserExistException;
-import com.trading212.judge.web.exception.user.UserRegistrationException;
+import com.trading212.judge.web.exception.InvalidRequestException;
+import com.trading212.judge.web.exception.ResourceExistException;
+import com.trading212.judge.web.exception.UnexpectedFailureException;
 import jakarta.validation.Valid;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
@@ -28,13 +30,13 @@ public class UserController {
                                       BindingResult bindingResult) {
 
         if (bindingResult.hasErrors() || !userRegistrationBindingModel.password().equals(userRegistrationBindingModel.confirmPassword())) {
-            throw new UserRegistrationException("User credentials not valid!");
+            throw new InvalidRequestException();
         }
 
         boolean exist = userService.isExist(userRegistrationBindingModel.username());
 
         if (exist) {
-            throw new UserExistException("User with that username already exists!");
+            throw new ResourceExistException();
         }
 
         UserRegistrationDTO userRegistrationDTO = new UserRegistrationDTO(
@@ -45,10 +47,10 @@ public class UserController {
         boolean isRegistered = userService.register(userRegistrationDTO);
 
         if (!isRegistered) {
-            throw new UserRegistrationException("User registration failed!");
+            throw new UnexpectedFailureException();
         }
 
-        return ResponseEntity.ok().build();
+        return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
     public static class Routes {

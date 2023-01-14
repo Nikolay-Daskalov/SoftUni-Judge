@@ -5,6 +5,8 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.trading212.judge.model.dto.task.CodeResultBindingModel;
 import com.trading212.judge.model.entity.task.enums.CodeLanguageEnum;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClientException;
@@ -15,6 +17,7 @@ import java.util.List;
 @Service
 public class ExecutorServiceAPI {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(ExecutorServiceAPI.class);
     private static final String URL = "http://localhost:8081/api/execute-code";
 
     private final RestTemplate restTemplate;
@@ -25,18 +28,20 @@ public class ExecutorServiceAPI {
         this.objectMapper = objectMapper;
     }
 
-    public CodeResultBindingModel sendCode(String sourceCode, CodeLanguageEnum codeLanguage, List<String> testInputs, List<String> testOutputs) {
+    public CodeResultBindingModel sendCode(String sourceCode, CodeLanguageEnum codeLanguage, List<String> testOutputs, List<String> testInputs) {
         ResponseEntity<String> codeResponse = null;
         try {
             codeResponse = restTemplate.postForEntity(URL, new CodeDataDTO(sourceCode, codeLanguage.name(), testOutputs, testInputs), String.class);
         } catch (RestClientException ignored) {
+            //Rest template throws exception for 400 status code
             return null;
         }
 
         try {
             return objectMapper.readValue(codeResponse.getBody(), CodeResultBindingModel.class);
         } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
+            LOGGER.error("JSON parsing from Executor service failed!");
+            return null;
         }
     }
 

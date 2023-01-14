@@ -17,7 +17,7 @@ public class SubmissionService {
         this.submissionRepository = submissionRepository;
     }
 
-    public Integer submit(Integer codeLanguageId, CodeResultEnum codeResult, Integer userId, Integer taskId, String executionTime) {
+    public Integer save(Integer codeLanguageId, CodeResultEnum codeResult, Integer userId, Integer taskId, String executionTime) {
         return submissionRepository.save(codeLanguageId, codeResult, userId, taskId, executionTime);
     }
 

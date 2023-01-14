@@ -4,11 +4,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
 @ResponseStatus(code = HttpStatus.BAD_REQUEST)
-public class AuthorizationHeaderNotValidException extends RuntimeException {
+public class InvalidRequestException extends RuntimeException {
+    private static final String MESSAGE = "Invalid field data.";
 
-    private static final String MESSAGE = "Authorization header is not valid.";
-
-    public AuthorizationHeaderNotValidException() {
+    public InvalidRequestException() {
         super(MESSAGE);
     }
 }

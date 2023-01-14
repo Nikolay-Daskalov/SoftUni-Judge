@@ -2,18 +2,16 @@ package com.trading212.judge.web.controller;
 
 import com.trading212.judge.model.binding.DocumentBindingModel;
 import com.trading212.judge.model.dto.task.DocumentDTO;
+import com.trading212.judge.model.dto.task.DocumentPageable;
 import com.trading212.judge.model.dto.task.DocumentSimpleDTO;
 import com.trading212.judge.model.dto.task.TaskSimpleDTO;
 import com.trading212.judge.service.task.DocumentService;
 import com.trading212.judge.util.path.ResourcePathUtil;
-import com.trading212.judge.web.exception.ServiceUnavailableException;
-import com.trading212.judge.web.exception.UnexpectedFailureException;
-import com.trading212.judge.web.exception.task.DocumentDataException;
+import com.trading212.judge.web.exception.*;
 import com.trading212.judge.service.task.TaskService;
-import com.trading212.judge.web.exception.task.DocumentExistException;
-import com.trading212.judge.web.exception.task.DocumentNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
@@ -39,10 +37,14 @@ public class DocumentController {
     }
 
     @GetMapping
-    public ResponseEntity<Set<DocumentSimpleDTO>> getAll() {
-        Set<DocumentSimpleDTO> documents = documentService.getAll();
+    public ResponseEntity<DocumentPageable> getAllPageable(@RequestParam(defaultValue = "0") Integer pageNumber) {
+        DocumentPageable documents = documentService.getAllPageable(pageNumber);
 
-        return !documents.isEmpty() ? ResponseEntity.ok(documents) : ResponseEntity.noContent().build();
+        if (documents == null) {
+            throw new InvalidRequestException();
+        }
+
+        return !documents.documents().isEmpty() ? ResponseEntity.ok(documents) : ResponseEntity.noContent().build();
     }
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
@@ -50,13 +52,7 @@ public class DocumentController {
                                               BindingResult bindingResult, HttpServletRequest httpServletRequest) {
 
         if (bindingResult.hasErrors()) {
-            throw new DocumentDataException("Invalid data!");
-        }
-
-        boolean exist = documentService.isExist(documentBindingModel.name());
-
-        if (exist) {
-            throw new DocumentExistException("Document already exists");
+            throw new InvalidRequestException();
         }
 
         File tempDocFile = null;
@@ -65,7 +61,7 @@ public class DocumentController {
             tempDocFile = File.createTempFile("document", "docx");
             documentBindingModel.document().transferTo(tempDocFile);
         } catch (IOException e) {
-            throw new UnexpectedFailureException("Temp file creation exception");
+            throw new UnexpectedFailureException();
         }
 
         DocumentDTO document = documentService.create(documentBindingModel.name(), documentBindingModel.isTest(),
@@ -73,48 +69,51 @@ public class DocumentController {
 
         tempDocFile.delete();
 
+        if (document == null) {
+            throw new InvalidRequestException();
+        }
+
         return ResponseEntity.created(resourcePathUtil.buildResourcePath(httpServletRequest, document.id()))
                 .body(document);
     }
 
     @DeleteMapping(path = Routes.BY_ID)
-    public ResponseEntity<?> deleteById(@PathVariable Integer id) {
+    @ResponseStatus(code = HttpStatus.NO_CONTENT)
+    public void deleteById(@PathVariable Integer id) {
         boolean exist = documentService.isExist(id);
 
         if (!exist) {
-            throw new DocumentNotFoundException("Document does not exist");
+            throw new ResourceNotFoundException();
         }
 
         boolean isDeleted = documentService.delete(id);
 
         if (!isDeleted) {
-            throw new ServiceUnavailableException("Document cannot be deleted!");
+            throw new UnexpectedFailureException();
         }
-
-        return ResponseEntity.noContent().build();
     }
 
     @GetMapping(path = Routes.BY_ID)
-    public ResponseEntity<?> findById(@PathVariable Integer id) {
+    public ResponseEntity<DocumentDTO> findById(@PathVariable Integer id) {
         Optional<DocumentDTO> documentDTO = documentService.findByID(id);
 
         if (documentDTO.isEmpty()) {
-            throw new DocumentNotFoundException("Document could not be found!");
+            throw new ResourceNotFoundException();
         }
 
-        return ResponseEntity.ok(documentDTO);
+        return ResponseEntity.ok(documentDTO.get());
     }
 
     @GetMapping(path = Routes.FIND_ALL_TASKS_BY_DOCUMENT_ID)
     public ResponseEntity<Set<TaskSimpleDTO>> findAllTasksSimple(@PathVariable Integer id) {
         if (id <= 0) {
-            throw new DocumentDataException("Invalid data!");
+            throw new InvalidRequestException();
         }
 
         boolean exist = documentService.isExist(id);
 
         if (!exist) {
-            throw new DocumentNotFoundException("Document does not exist!");
+            throw new ResourceNotFoundException();
         }
 
         Set<TaskSimpleDTO> allByDocumentId = taskService.findAllByDocument(id);
