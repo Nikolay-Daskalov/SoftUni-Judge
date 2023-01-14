@@ -1,7 +1,7 @@
 package com.trading212.judge.web.validation.Impl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.trading212.judge.model.dto.task.TaskAnswersJSON;
+import com.trading212.judge.model.dto.submission.TaskAnswersDTO;
 import com.trading212.judge.web.validation.IsJSON;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
@@ -50,7 +50,7 @@ public class IsJSONValidator implements ConstraintValidator<IsJSON, MultipartFil
             File fileToValidate = File.createTempFile("answers", ".json");
             Files.write(fileToValidate.toPath(), file.getBytes());
 
-            objectMapper.readValue(fileToValidate, TaskAnswersJSON.class);
+            objectMapper.readValue(fileToValidate, TaskAnswersDTO.class);
 
             fileToValidate.delete();
             return true;

@@ -1,12 +1,13 @@
-package com.trading212.judge.service.task;
+package com.trading212.judge.service.submission;
 
-import com.trading212.judge.model.dto.task.SubmissionDTO;
-import com.trading212.judge.model.entity.task.SubmissionEntity;
-import com.trading212.judge.repository.task.SubmissionRepository;
+import com.trading212.judge.model.dto.submission.SubmissionDTO;
+import com.trading212.judge.model.entity.submission.SubmissionEntity;
+import com.trading212.judge.repository.submission.SubmissionRepository;
 import com.trading212.judge.service.enums.CodeResultEnum;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
+import java.util.Set;
 
 @Service
 public class SubmissionService {
@@ -45,5 +46,9 @@ public class SubmissionService {
         );
 
         return Optional.of(submissionDTO);
+    }
+
+    public boolean deleteAllByTasksId(Set<Integer> tasksIds) {
+        return submissionRepository.deleteAllByTasksIds(tasksIds);
     }
 }

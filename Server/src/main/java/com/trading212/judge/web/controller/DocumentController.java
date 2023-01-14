@@ -3,7 +3,7 @@ package com.trading212.judge.web.controller;
 import com.trading212.judge.model.binding.DocumentBindingModel;
 import com.trading212.judge.model.dto.task.DocumentDTO;
 import com.trading212.judge.model.dto.task.DocumentPageable;
-import com.trading212.judge.model.dto.task.DocumentSimpleDTO;
+import com.trading212.judge.model.dto.task.TaskPageable;
 import com.trading212.judge.model.dto.task.TaskSimpleDTO;
 import com.trading212.judge.service.task.DocumentService;
 import com.trading212.judge.util.path.ResourcePathUtil;
@@ -56,7 +56,6 @@ public class DocumentController {
         }
 
         File tempDocFile = null;
-
         try {
             tempDocFile = File.createTempFile("document", "docx");
             documentBindingModel.document().transferTo(tempDocFile);
@@ -64,11 +63,15 @@ public class DocumentController {
             throw new UnexpectedFailureException();
         }
 
+        boolean docExist = documentService.isExist(documentBindingModel.name());
+        if (docExist) {
+            throw new ResourceExistException();
+        }
+
         DocumentDTO document = documentService.create(documentBindingModel.name(), documentBindingModel.isTest(),
                 documentBindingModel.difficulty(), tempDocFile);
 
         tempDocFile.delete();
-
         if (document == null) {
             throw new InvalidRequestException();
         }
@@ -80,13 +83,11 @@ public class DocumentController {
     @DeleteMapping(path = Routes.BY_ID)
     @ResponseStatus(code = HttpStatus.NO_CONTENT)
     public void deleteById(@PathVariable Integer id) {
-        boolean exist = documentService.isExist(id);
+        Boolean isDeleted = documentService.delete(id);
 
-        if (!exist) {
+        if (isDeleted == null) {
             throw new ResourceNotFoundException();
         }
-
-        boolean isDeleted = documentService.delete(id);
 
         if (!isDeleted) {
             throw new UnexpectedFailureException();
@@ -105,8 +106,8 @@ public class DocumentController {
     }
 
     @GetMapping(path = Routes.FIND_ALL_TASKS_BY_DOCUMENT_ID)
-    public ResponseEntity<Set<TaskSimpleDTO>> findAllTasksSimple(@PathVariable Integer id) {
-        if (id <= 0) {
+    public ResponseEntity<TaskPageable> findAllTasksSimple(@PathVariable Integer id, @RequestParam(defaultValue = "0") Integer pageNumber) {
+        if (id <= 0 || pageNumber < 0) {
             throw new InvalidRequestException();
         }
 
@@ -116,16 +117,16 @@ public class DocumentController {
             throw new ResourceNotFoundException();
         }
 
-        Set<TaskSimpleDTO> allByDocumentId = taskService.findAllByDocument(id);
+        TaskPageable tasksByDoc = taskService.findAllByDocumentPageable(id, pageNumber);
 
-        return allByDocumentId.isEmpty() ? ResponseEntity.noContent().build() : ResponseEntity.ok(allByDocumentId);
+        return tasksByDoc.task().isEmpty() ? ResponseEntity.noContent().build() : ResponseEntity.ok(tasksByDoc);
     }
 
     public static class Routes {
         public static final String BASE = "/api/documents";
 
-        private static final String FIND_ALL_TASKS_BY_DOCUMENT_ID = "/{id}/tasks";
+        public static final String FIND_ALL_TASKS_BY_DOCUMENT_ID = "/{id}/tasks";
 
-        private static final String BY_ID = "/{id}";
+        public static final String BY_ID = "/{id}";
     }
 }

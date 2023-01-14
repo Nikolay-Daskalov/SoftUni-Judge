@@ -5,16 +5,14 @@ import com.trading212.judge.model.dto.task.DocumentSimpleDTO;
 import com.trading212.judge.model.entity.task.DocumentEntity;
 import com.trading212.judge.repository.task.DocumentRepository;
 import com.trading212.judge.service.enums.DocumentDifficulty;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
-import org.springframework.transaction.support.TransactionTemplate;
 
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.Statement;
 import java.time.ZoneOffset;
 import java.util.LinkedHashSet;
@@ -24,14 +22,10 @@ import java.util.Set;
 @Repository
 public class MariaDBDocumentRepositoryImpl implements DocumentRepository {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(MariaDBDocumentRepositoryImpl.class);
-
     private final JdbcTemplate jdbcTemplate;
-    private final TransactionTemplate transactionTemplate;
 
-    public MariaDBDocumentRepositoryImpl(JdbcTemplate jdbcTemplate, TransactionTemplate transactionTemplate) {
+    public MariaDBDocumentRepositoryImpl(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
-        this.transactionTemplate = transactionTemplate;
     }
 
 
@@ -136,6 +130,11 @@ public class MariaDBDocumentRepositoryImpl implements DocumentRepository {
         return true;
     }
 
+    @Override
+    public String findURLById(Integer id) {
+        return jdbcTemplate.queryForObject(Queries.FIND_URL_BY_ID, (rs, rowNum) -> rs.getString(1), id);
+    }
+
     private static class Queries {
 
         private static final Integer PAGE_SIZE = 8;
@@ -183,6 +182,12 @@ public class MariaDBDocumentRepositoryImpl implements DocumentRepository {
 
         private static final String DELETE_BY_ID = String.format("""
                 DELETE FROM `%s`
+                WHERE `id` = ?
+                """, DocumentEntity.TABLE_NAME);
+
+        private static final String FIND_URL_BY_ID = String.format("""
+                SELECT `url`
+                FROM `%s`
                 WHERE `id` = ?
                 """, DocumentEntity.TABLE_NAME);
     }

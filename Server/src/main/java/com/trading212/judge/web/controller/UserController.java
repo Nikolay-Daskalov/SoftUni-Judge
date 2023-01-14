@@ -8,7 +8,6 @@ import com.trading212.judge.web.exception.ResourceExistException;
 import com.trading212.judge.web.exception.UnexpectedFailureException;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
@@ -26,14 +25,15 @@ public class UserController {
 
 
     @PostMapping(path = Routes.REGISTER)
-    public ResponseEntity<?> register(@RequestBody @Valid UserRegistrationBindingModel userRegistrationBindingModel,
+    @ResponseStatus(HttpStatus.CREATED)
+    public void register(@RequestBody @Valid UserRegistrationBindingModel userRegistrationBindingModel,
                                       BindingResult bindingResult) {
 
         if (bindingResult.hasErrors() || !userRegistrationBindingModel.password().equals(userRegistrationBindingModel.confirmPassword())) {
             throw new InvalidRequestException();
         }
 
-        boolean exist = userService.isExist(userRegistrationBindingModel.username());
+        boolean exist = userService.isExist(userRegistrationBindingModel.username(), userRegistrationBindingModel.email());
 
         if (exist) {
             throw new ResourceExistException();
@@ -49,8 +49,6 @@ public class UserController {
         if (!isRegistered) {
             throw new UnexpectedFailureException();
         }
-
-        return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
     public static class Routes {

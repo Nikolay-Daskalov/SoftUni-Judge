@@ -1,8 +1,8 @@
-package com.trading212.judge.repository.task.db.mariadb;
+package com.trading212.judge.repository.submission.db.mariadb;
 
-import com.trading212.judge.model.entity.task.LanguageEntity;
-import com.trading212.judge.model.entity.task.enums.CodeLanguageEnum;
-import com.trading212.judge.repository.task.CodeLanguageRepository;
+import com.trading212.judge.model.entity.submission.CodeLanguageEntity;
+import com.trading212.judge.model.entity.submission.enums.CodeLanguageEnum;
+import com.trading212.judge.repository.submission.CodeLanguageRepository;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
@@ -35,6 +35,6 @@ public class MariaDBCodeLanguageRepositoryImpl implements CodeLanguageRepository
                 SELECT `id`
                 FROM `%s`
                 WHERE `name` = ?
-                """, LanguageEntity.TABLE_NAME);
+                """, CodeLanguageEntity.TABLE_NAME);
     }
 }

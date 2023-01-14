@@ -1,9 +1,11 @@
-package com.trading212.judge.service.task;
+package com.trading212.judge.service.submission;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.trading212.judge.api.CloudStorageAPI;
+import com.trading212.judge.model.dto.submission.*;
 import com.trading212.judge.model.dto.task.*;
-import com.trading212.judge.model.entity.task.enums.CodeLanguageEnum;
+import com.trading212.judge.model.entity.submission.enums.CodeLanguageEnum;
+import com.trading212.judge.service.task.TaskService;
 import com.trading212.judge.service.user.UserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -54,20 +56,16 @@ public class CodeExecutionService {
         }
 
         File file = cloudStorageAPI.getAnswersObject(taskById.get().answersURL());
-        TaskAnswersJSON taskAnswersJSON = mapFileToPOJO(file);
+        TaskAnswersDTO taskAnswersDTO = mapFileToPOJO(file);
+        file.delete();
 
-        if (taskAnswersJSON == null) {
+        if (taskAnswersDTO == null) {
             return null;
         }
 
-        List<String> testInputs = new ArrayList<>();
-        List<String> testOutputs = new ArrayList<>();
-        for (AnswerCases answerCase : taskAnswersJSON.cases()) {
-            testInputs.add(answerCase.input());
-            testOutputs.add(answerCase.output());
-        }
+        List<AnswerCases> answersList = new ArrayList<>(taskAnswersDTO.cases());
 
-        CodeResultBindingModel codeResult = executorServiceAPI.sendCode(sourceCode, codeLanguage, testOutputs, testInputs);
+        CodeResultBindingModel codeResult = executorServiceAPI.sendCode(sourceCode, codeLanguage, answersList);
         if (codeResult == null) {
             return null;
         }
@@ -84,16 +82,16 @@ public class CodeExecutionService {
         );
     }
 
-    private TaskAnswersJSON mapFileToPOJO(File file) {
-        TaskAnswersJSON taskAnswersJSON = null;
+    private TaskAnswersDTO mapFileToPOJO(File file) {
+        TaskAnswersDTO taskAnswersDTO = null;
 
         try {
-            taskAnswersJSON = objectMapper.readValue(file, TaskAnswersJSON.class);
+            taskAnswersDTO = objectMapper.readValue(file, TaskAnswersDTO.class);
         } catch (IOException e) {
             LOGGER.error("JSON file cannot be mapped to POJO.");
             return null;
         }
 
-        return taskAnswersJSON;
+        return taskAnswersDTO;
     }
 }

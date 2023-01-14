@@ -1,6 +1,5 @@
 package com.trading212.codeexecutor.controller;
 
-import com.trading212.codeexecutor.enums.CodeResultEnum;
 import com.trading212.codeexecutor.model.binding.CodeDataBindingModel;
 import com.trading212.codeexecutor.model.dto.CodeResult;
 import com.trading212.codeexecutor.model.view.CodeExecutionResultViewModel;
@@ -30,8 +29,7 @@ public class CodeExecutionController {
         CodeResult codeResult = codeExecutionService.execute(
                 codeDataBindingModel.code(),
                 codeDataBindingModel.language(),
-                codeDataBindingModel.testOutputs(),
-                codeDataBindingModel.testInputs());
+                codeDataBindingModel.answers());
 
         if (codeResult == null) {
             return ResponseEntity.badRequest().build();

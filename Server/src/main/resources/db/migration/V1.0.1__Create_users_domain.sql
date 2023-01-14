@@ -13,8 +13,8 @@ CREATE TABLE `users`
 CREATE TABLE `roles`
 (
     `id`         INT PRIMARY KEY AUTO_INCREMENT,
-    `role`       ENUM('USER', 'ADMIN') NOT NULL UNIQUE,
-    `created_at` TIMESTAMP(3)          NOT NULL DEFAULT CURRENT_TIMESTAMP
+    `role`       ENUM ('USER', 'ADMIN') NOT NULL UNIQUE,
+    `created_at` TIMESTAMP(3)           NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TABLE `users_roles`

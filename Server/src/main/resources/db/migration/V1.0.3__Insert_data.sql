@@ -1,19 +1,18 @@
+# noinspection SqlNoDataSourceInspectionForFile
+
 INSERT INTO `users` (`username`, `email`, `password_hash`)
-VALUE
+    VALUE
 -- pass is 12345
-('Admin', 'adminmail@somecompany.com','$2a$10$uW3wXutdYv5qJLO/9jPv5O6nwt3d6qh3ugz8mVIfdUrORqDzINhsq');
+    ('Admin', 'adminmail@somecompany.com', '$2a$10$uW3wXutdYv5qJLO/9jPv5O6nwt3d6qh3ugz8mVIfdUrORqDzINhsq');
 
 INSERT INTO `roles` (`role`)
-VALUES
-('ADMIN'),
-('USER');
+VALUES ('ADMIN'),
+       ('USER');
 
 INSERT INTO `users_roles` (`user_id`, `role_id`)
-VALUES
-(1, 1),
-(1, 2);
+VALUES (1, 1),
+       (1, 2);
 
 INSERT INTO `code_languages` (`name`)
-VALUES
-('JAVA'),
-('JAVASCRIPT');
+VALUES ('JAVA'),
+       ('JAVASCRIPT');

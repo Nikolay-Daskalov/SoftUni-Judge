@@ -24,4 +24,6 @@ public interface DocumentRepository {
     boolean isExist(Integer id);
 
     boolean delete(Integer id);
+
+    String findURLById(Integer id);
 }

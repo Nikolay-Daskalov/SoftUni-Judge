@@ -1,7 +1,7 @@
-package com.trading212.judge.service.task;
+package com.trading212.judge.service.submission;
 
-import com.trading212.judge.model.entity.task.enums.CodeLanguageEnum;
-import com.trading212.judge.repository.task.CodeLanguageRepository;
+import com.trading212.judge.model.entity.submission.enums.CodeLanguageEnum;
+import com.trading212.judge.repository.submission.CodeLanguageRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;

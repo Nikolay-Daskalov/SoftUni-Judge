@@ -1,8 +1,7 @@
-package com.trading212.judge.repository.task.db.mariadb;
+package com.trading212.judge.repository.submission.db.mariadb;
 
-import com.trading212.judge.model.dto.task.SubmissionDTO;
-import com.trading212.judge.model.entity.task.SubmissionEntity;
-import com.trading212.judge.repository.task.SubmissionRepository;
+import com.trading212.judge.model.entity.submission.SubmissionEntity;
+import com.trading212.judge.repository.submission.SubmissionRepository;
 import com.trading212.judge.service.enums.CodeResultEnum;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
@@ -13,6 +12,8 @@ import java.sql.PreparedStatement;
 import java.sql.Statement;
 import java.time.ZoneOffset;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Repository
 public class MariaDBSubmissionRepositoryImpl implements SubmissionRepository {
@@ -63,6 +64,24 @@ public class MariaDBSubmissionRepositoryImpl implements SubmissionRepository {
         return Optional.ofNullable(submissionEntity);
     }
 
+    @Override
+    public boolean deleteAllByTasksIds(Set<Integer> tasksIds) {
+        if (tasksIds.isEmpty()) {
+            return true;
+        }
+
+        String sqlUnknownParameter = "?";
+
+        String allParameters = tasksIds.stream()
+                .map(taskId -> sqlUnknownParameter)
+                .collect(Collectors.joining(", "));
+
+        String queryClauseToAdd = "(" + allParameters + ")";
+
+        jdbcTemplate.update(Queries.DELETE_ALL_BY_TASKS_ID + queryClauseToAdd, tasksIds.toArray(Integer[]::new));
+        return true;
+    }
+
     private static class Queries {
         private static final String SAVE = String.format("""
                 INSERT INTO `%s` (`task_id`, `user_id`, `result`, `code_language_id`, `execution_time`)
@@ -74,6 +93,11 @@ public class MariaDBSubmissionRepositoryImpl implements SubmissionRepository {
                 SELECT `id`, `task_id`, `user_id`, `result`, `code_language_id`, `execution_time`, `created_at`
                 FROM `%s`
                 WHERE `id` = ?
+                """, SubmissionEntity.TABLE_NAME);
+
+        private static final String DELETE_ALL_BY_TASKS_ID = String.format("""
+                DELETE FROM `%s`
+                WHERE `task_id` IN\s
                 """, SubmissionEntity.TABLE_NAME);
     }
 }

@@ -1,8 +1,8 @@
 package com.trading212.judge.web.controller;
 
 import com.trading212.judge.model.binding.CodeBindingModel;
-import com.trading212.judge.model.dto.task.CodeResultDTO;
-import com.trading212.judge.service.task.CodeExecutionService;
+import com.trading212.judge.model.dto.submission.CodeResultDTO;
+import com.trading212.judge.service.submission.CodeExecutionService;
 import com.trading212.judge.util.path.ResourcePathUtil;
 import com.trading212.judge.web.exception.InvalidRequestException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -39,7 +39,7 @@ public class CodeExecutionController {
             throw new InvalidRequestException();
         }
 
-        CodeResultDTO codeResultDTO = codeExecutionService.execute(codeBindingModel.sourceCode(), codeBindingModel.codeLanguage(), codeBindingModel.taskId(), "Admin");//TODO:
+        CodeResultDTO codeResultDTO = codeExecutionService.execute(codeBindingModel.sourceCode(), codeBindingModel.codeLanguage(), codeBindingModel.taskId(), principal.getName());
 
         if (codeResultDTO == null) {
             throw new InvalidRequestException();

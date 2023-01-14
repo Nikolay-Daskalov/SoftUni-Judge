@@ -11,4 +11,6 @@ public interface CloudStorageAPI {
     File getAnswersObject(String objectKey);
 
     String getObjectURL(String objectKey);
+
+    boolean deleteObjects(String... objectKeys);
 }

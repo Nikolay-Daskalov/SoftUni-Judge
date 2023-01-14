@@ -88,14 +88,5 @@ public class DocumentEntity extends BaseEntity {
         public DocumentEntity build() {
             return document;
         }
-
-        public void reset() {
-            document.id = null;
-            document.name = null;
-            document.url = null;
-            document.difficulty = null;
-            document.isTest = null;
-            document.createdAt = null;
-        }
     }
 }

@@ -2,11 +2,13 @@ package com.trading212.codeexecutor.service;
 
 import com.trading212.codeexecutor.enums.CodeResultEnum;
 import com.trading212.codeexecutor.enums.LanguageEnum;
+import com.trading212.codeexecutor.model.binding.AnswerCases;
 import com.trading212.codeexecutor.model.dto.CodeResult;
 import com.trading212.codeexecutor.model.dto.ProcessResult;
 import org.springframework.stereotype.Service;
 
 import java.io.*;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -15,7 +17,7 @@ public class CodeExecutionService {
     public CodeExecutionService() {
     }
 
-    public CodeResult execute(String source, LanguageEnum language, List<String> testOutputs, List<String> testInputs) {
+    public CodeResult execute(String source, LanguageEnum language, List<AnswerCases> answers) {
         try {
             File tempFile = createFile(source);
 
@@ -27,15 +29,44 @@ public class CodeExecutionService {
                 return null;
             }
 
-            ProcessResult result = processService.run(testInputs.toArray(String[]::new));
+            List<String> executionTimeHolder = new ArrayList<>();
+            for (AnswerCases answer : answers) {
+                CodeResult codeResult;
+
+                ProcessResult processResult;
+                if (answer.inputs() == null) {
+                    processResult = processService.run();
+                } else {
+                    processResult = processService.run(answer.inputs().toArray(String[]::new));
+                }
+
+                if (processResult == null) {
+                    return null;
+                }
+
+                codeResult = checkResult(processResult, answer.outputs());
+
+                executionTimeHolder.add(codeResult.executionTime());
+                if (codeResult.codeResult() == CodeResultEnum.UNSOLVED) {
+                    return getResult(executionTimeHolder, CodeResultEnum.UNSOLVED);
+                }
+            }
 
             tempFile.delete();
             deleteClassFile();
 
-            return checkResult(result, testOutputs);
+            return getResult(executionTimeHolder, CodeResultEnum.SOLVED);
         } catch (IOException | InterruptedException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    private CodeResult getResult(List<String> executionTimeHolder, CodeResultEnum codeResult) {
+        double avgExecutionTime = executionTimeHolder.stream()
+                .mapToDouble(Double::valueOf)
+                .average().getAsDouble();
+
+        return new CodeResult(codeResult, String.valueOf(avgExecutionTime));
     }
 
     private CodeResult checkResult(ProcessResult processResult, List<String> testOutputs) {

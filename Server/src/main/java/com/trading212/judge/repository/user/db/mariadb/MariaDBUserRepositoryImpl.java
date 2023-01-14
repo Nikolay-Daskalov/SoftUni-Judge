@@ -70,8 +70,8 @@ public class MariaDBUserRepositoryImpl implements UserRepository {
     }
 
     @Override
-    public boolean isExists(String username) {
-        Integer existCount = jdbcTemplate.queryForObject(Queries.IS_EXIST, (rs, rowNumber) -> rs.getInt(1), username);
+    public boolean isExist(String username, String email) {
+        Integer existCount = jdbcTemplate.queryForObject(Queries.IS_EXIST, (rs, rowNumber) -> rs.getInt(1), username, email);
 
         return existCount == 1;
     }
@@ -98,7 +98,7 @@ public class MariaDBUserRepositoryImpl implements UserRepository {
         private static final String IS_EXIST = String.format("""
                 SELECT COUNT(`username`)
                 FROM `%s`
-                WHERE `username` = ?
+                WHERE `username` = ? OR `email` = ?
                 """, UserEntity.TABLE_NAME);
 
         private static final String SET_STANDARD_ROLE = String.format("""

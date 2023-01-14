@@ -1,40 +1,31 @@
 package com.trading212.judge.repository.task.db.mariadb;
 
+import com.trading212.judge.model.dto.task.TaskPageable;
 import com.trading212.judge.model.dto.task.TaskSimpleDTO;
 import com.trading212.judge.model.entity.task.DocumentEntity;
 import com.trading212.judge.model.entity.task.TaskEntity;
 import com.trading212.judge.repository.task.TaskRepository;
-import com.trading212.judge.service.enums.DocumentDifficulty;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
-import org.springframework.transaction.support.TransactionTemplate;
 
 import java.sql.PreparedStatement;
 import java.sql.Statement;
 import java.time.ZoneOffset;
-import java.util.LinkedHashSet;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
 @Repository
 public class MariaDBTaskRepositoryImpl implements TaskRepository {
 
-    private final static Logger LOGGER = LoggerFactory.getLogger(MariaDBTaskRepositoryImpl.class);
-
     private final JdbcTemplate jdbcTemplate;
-    private final TransactionTemplate transactionTemplate;
 
-    public MariaDBTaskRepositoryImpl(JdbcTemplate jdbcTemplate, TransactionTemplate transactionTemplate) {
+    public MariaDBTaskRepositoryImpl(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
-        this.transactionTemplate = transactionTemplate;
     }
 
     @Override
-    public Set<TaskSimpleDTO> findAllByDocument(Integer documentId) {
+    public TaskPageable findAllByDocumentPageable(Integer docId, Integer pageNumber) {
         Set<TaskSimpleDTO> taskEntities = new LinkedHashSet<>();
 
         jdbcTemplate.query(Queries.FIND_ALL_BY_DOCUMENT_ID_SIMPLE, rs -> {
@@ -42,9 +33,12 @@ public class MariaDBTaskRepositoryImpl implements TaskRepository {
             String name = rs.getString(2);
 
             taskEntities.add(new TaskSimpleDTO(id, name));
-        }, documentId);
+        }, docId, Queries.PAGE_SIZE * pageNumber);
 
-        return taskEntities;
+        Integer rowCount = jdbcTemplate.queryForObject(Queries.DB_ROWS_COUNT, (rs, rowNum) -> rs.getInt(1));
+        Integer totalPages = (int) Math.ceil(rowCount / (Queries.PAGE_SIZE * 1.0));
+
+        return new TaskPageable(taskEntities, totalPages);
     }
 
     @Override
@@ -54,22 +48,12 @@ public class MariaDBTaskRepositoryImpl implements TaskRepository {
                 return null;
             }
 
-            DocumentEntity documentEntity = new DocumentEntity.Builder()
-                    .setId(rs.getInt(5))
-                    .setName(rs.getString(6))
-                    .setURL(rs.getString(7))
-                    .setDifficulty(DocumentDifficulty.valueOf(rs.getString(8)))
-                    .setIsTest(rs.getBoolean(9))
-                    .setCreatedAt(rs.getTimestamp(10).toLocalDateTime().toInstant(ZoneOffset.UTC))
-                    .build();
-
-
             return new TaskEntity.Builder()
                     .setId(rs.getInt(1))
                     .setName(rs.getString(2))
-                    .setAnswersURL(rs.getString(3))
-                    .setCreatedAt(rs.getTimestamp(4).toLocalDateTime().toInstant(ZoneOffset.UTC))
-                    .setDocument(documentEntity)
+                    .setDocumentId(rs.getInt(3))
+                    .setAnswersURL(rs.getString(4))
+                    .setCreatedAt(rs.getTimestamp(5).toLocalDateTime().toInstant(ZoneOffset.UTC))
                     .build();
         }, id);
 
@@ -112,15 +96,37 @@ public class MariaDBTaskRepositoryImpl implements TaskRepository {
         return true;
     }
 
+    @Override
+    public Set<Integer> findAllByDocumentId(Integer id) {
+        List<Integer> taskIds = jdbcTemplate.query(Queries.FIND_ALL_ID_BY_DOCUMENT_ID, (rs, rowNum) -> rs.getInt(1), id);
+
+        return new HashSet<>(taskIds);
+    }
+
+    @Override
+    public Set<String> findAllURLByDocumentId(Integer id) {
+        List<String> urls = jdbcTemplate.query(Queries.FIND_ALL_URLS_BY_DOCUMENT_ID, (rs, rowNum) -> rs.getString(1), id);
+
+        return new HashSet<>(urls);
+    }
+
 
     private static class Queries {
+
+        private static final Integer PAGE_SIZE = 8;
         private static final String FIND_ALL_BY_DOCUMENT_ID_SIMPLE = String.format("""
                 SELECT t.`id`, t.`name`
                 FROM `%s` AS t
                 JOIN `%s` AS d
                 ON d.`id` = t.`document_id`
                 WHERE d.`id` = ?
-                """, TaskEntity.TABLE_NAME, DocumentEntity.TABLE_NAME);
+                ORDER BY t.`id` ASC
+                LIMIT %d OFFSET ?
+                """, TaskEntity.TABLE_NAME, DocumentEntity.TABLE_NAME, PAGE_SIZE);
+        private static final String DB_ROWS_COUNT = String.format("""
+                SELECT COUNT(`id`)
+                FROM `%s`
+                """, TaskEntity.TABLE_NAME);
 
         private static final String IS_EXIST_BY_ID = String.format("""
                 SELECT COUNT(*)
@@ -146,12 +152,21 @@ public class MariaDBTaskRepositoryImpl implements TaskRepository {
                 """, TaskEntity.TABLE_NAME);
 
         private static final String FIND_BY_ID = String.format("""
-                SELECT t.`id`, t.`name`, t.`answer_url`, t.`created_at`,
-                d.`id`, d.`name`, d.`url`, d.`difficulty`, d.`is_test`, d.`created_at`
-                FROM `%s` AS t
-                JOIN `%s` AS d
-                ON t.`document_id` = d.`id`
-                WHERE t.`id` = ?
-                """, TaskEntity.TABLE_NAME, DocumentEntity.TABLE_NAME);
+                SELECT `id`, `name`, `document_id`, `answer_url`, `created_at`
+                FROM `%s`
+                WHERE `id` = ?
+                """, TaskEntity.TABLE_NAME);
+
+        private static final String FIND_ALL_ID_BY_DOCUMENT_ID = String.format("""
+                SELECT `id`
+                FROM `%s`
+                WHERE `document_id` = ?
+                """, TaskEntity.TABLE_NAME);
+
+        private static final String FIND_ALL_URLS_BY_DOCUMENT_ID = String.format("""
+                SELECT `answer_url`
+                FROM `%s`
+                WHERE `document_id` = ?
+                """, TaskEntity.TABLE_NAME);
     }
 }

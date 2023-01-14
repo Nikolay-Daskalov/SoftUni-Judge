@@ -18,8 +18,8 @@ public class UserService {
     }
 
 
-    public boolean isExist(String username) {
-        return userRepository.isExists(username);
+    public boolean isExist(String username, String email) {
+        return userRepository.isExist(username, email);
     }
 
     public boolean register(UserRegistrationDTO userRegistrationDTO) {

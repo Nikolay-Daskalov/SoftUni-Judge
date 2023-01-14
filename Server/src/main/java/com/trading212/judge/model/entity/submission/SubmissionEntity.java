@@ -1,4 +1,4 @@
-package com.trading212.judge.model.entity.task;
+package com.trading212.judge.model.entity.submission;
 
 import com.trading212.judge.model.entity.base.BaseEntity;
 import com.trading212.judge.service.enums.CodeResultEnum;

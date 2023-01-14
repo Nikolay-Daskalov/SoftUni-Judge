@@ -1,10 +1,11 @@
-package com.trading212.judge.service.task;
+package com.trading212.judge.service.submission;
 
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.trading212.judge.model.dto.task.CodeResultBindingModel;
-import com.trading212.judge.model.entity.task.enums.CodeLanguageEnum;
+import com.trading212.judge.model.dto.submission.AnswerCases;
+import com.trading212.judge.model.dto.submission.CodeResultBindingModel;
+import com.trading212.judge.model.entity.submission.enums.CodeLanguageEnum;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
@@ -28,10 +29,10 @@ public class ExecutorServiceAPI {
         this.objectMapper = objectMapper;
     }
 
-    public CodeResultBindingModel sendCode(String sourceCode, CodeLanguageEnum codeLanguage, List<String> testOutputs, List<String> testInputs) {
+    public CodeResultBindingModel sendCode(String sourceCode, CodeLanguageEnum codeLanguage, List<AnswerCases> answers) {
         ResponseEntity<String> codeResponse = null;
         try {
-            codeResponse = restTemplate.postForEntity(URL, new CodeDataDTO(sourceCode, codeLanguage.name(), testOutputs, testInputs), String.class);
+            codeResponse = restTemplate.postForEntity(URL, new CodeDataDTO(sourceCode, codeLanguage.name(), answers), String.class);
         } catch (RestClientException ignored) {
             //Rest template throws exception for 400 status code
             return null;
@@ -48,7 +49,6 @@ public class ExecutorServiceAPI {
     private record CodeDataDTO(
             String code,
             String language,
-            List<String> testOutputs,
-            List<String> testInputs) {
+            List<AnswerCases> answers) {
     }
 }

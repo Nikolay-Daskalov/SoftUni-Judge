@@ -43,13 +43,13 @@ public class JWTUsernamePasswordAuthenticationFilter extends UsernamePasswordAut
         String httpMethod = request.getMethod();
 
         if (!httpMethod.equals(HttpMethod.POST.name())) {
-            throw new AuthenticationServiceException("Http method is not POST!");
+            throw new AuthenticationServiceException("Http method is not POST.");
         }
 
         UserLoginModel userLoginModel = parseJson(request);
 
         if (userLoginModel == null) {
-            throw new AuthenticationServiceException("Invalid JSON data!");
+            throw new AuthenticationServiceException("Invalid JSON data.");
         }
 
         UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(userLoginModel.username(), userLoginModel.password());
@@ -64,7 +64,7 @@ public class JWTUsernamePasswordAuthenticationFilter extends UsernamePasswordAut
             String json = bodyReader.lines().collect(Collectors.joining());
             userLoginModel = objectMapper.readValue(json, UserLoginModel.class);
         } catch (IOException ignored) {
-
+            return null;
         }
 
         return userLoginModel;

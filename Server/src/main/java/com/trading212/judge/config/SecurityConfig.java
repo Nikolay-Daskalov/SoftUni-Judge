@@ -1,10 +1,14 @@
 package com.trading212.judge.config;
 
+import com.trading212.judge.web.controller.CodeExecutionController;
+import com.trading212.judge.web.controller.DocumentController;
+import com.trading212.judge.web.controller.TaskController;
 import com.trading212.judge.web.controller.UserController;
 import com.trading212.judge.web.filter.JWTFilter;
 import com.trading212.judge.web.filter.JWTUsernamePasswordAuthenticationFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -32,6 +36,10 @@ public class SecurityConfig {
                 .and()
                 .authorizeHttpRequests() // Set routes matchers
                 .requestMatchers(UserController.Routes.BASE + UserController.Routes.REGISTER).permitAll()
+                .requestMatchers(CodeExecutionController.Routes.BASE).fullyAuthenticated()
+                .requestMatchers(HttpMethod.GET, DocumentController.Routes.BASE).permitAll()
+                .requestMatchers(DocumentController.Routes.BASE + ALL_SUB_ROUTES).fullyAuthenticated()
+                .requestMatchers(TaskController.Routes.BASE + ALL_SUB_ROUTES).fullyAuthenticated()
                 .anyRequest().permitAll()
                 .and()
                 .addFilterBefore(authenticationFilter, UsernamePasswordAuthenticationFilter.class) // Add Custom filters in the SecurityFilterChain

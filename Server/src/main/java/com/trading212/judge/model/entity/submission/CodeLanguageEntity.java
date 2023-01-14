@@ -1,18 +1,18 @@
-package com.trading212.judge.model.entity.task;
+package com.trading212.judge.model.entity.submission;
 
-import com.trading212.judge.model.entity.task.enums.CodeLanguageEnum;
+import com.trading212.judge.model.entity.submission.enums.CodeLanguageEnum;
 import com.trading212.judge.model.entity.base.BaseEntity;
 
 import java.time.Instant;
 import java.util.Objects;
 
-public class LanguageEntity extends BaseEntity {
+public class CodeLanguageEntity extends BaseEntity {
 
     public static final String TABLE_NAME = "code_languages";
 
     private final CodeLanguageEnum name;
 
-    public LanguageEntity(Integer id, Instant createdAt, CodeLanguageEnum name) {
+    public CodeLanguageEntity(Integer id, Instant createdAt, CodeLanguageEnum name) {
         super(id, createdAt);
         this.name = name;
     }
@@ -25,7 +25,7 @@ public class LanguageEntity extends BaseEntity {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        LanguageEntity that = (LanguageEntity) o;
+        CodeLanguageEntity that = (CodeLanguageEntity) o;
         return name == that.name;
     }
 

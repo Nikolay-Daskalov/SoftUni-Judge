@@ -1,9 +1,8 @@
 package com.trading212.judge.service.task;
 
-import com.amazonaws.services.s3.AmazonS3;
 import com.trading212.judge.api.CloudStorageAPI;
 import com.trading212.judge.model.dto.task.TaskDTO;
-import com.trading212.judge.model.dto.task.TaskSimpleDTO;
+import com.trading212.judge.model.dto.task.TaskPageable;
 import com.trading212.judge.model.entity.task.TaskEntity;
 import com.trading212.judge.repository.task.TaskRepository;
 import org.springframework.stereotype.Service;
@@ -11,6 +10,8 @@ import org.springframework.stereotype.Service;
 import java.io.File;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 
 @Service
 public class TaskService {
@@ -23,16 +24,12 @@ public class TaskService {
         this.cloudStorageAPI = cloudStorageAPI;
     }
 
-    public Set<TaskSimpleDTO> findAllByDocument(Integer id) {
-        return taskRepository.findAllByDocument(id);
+    public TaskPageable findAllByDocumentPageable(Integer id, Integer pageNumber) {
+        return taskRepository.findAllByDocumentPageable(id, pageNumber);
     }
 
     public boolean isExist(String name) {
         return taskRepository.isExist(name);
-    }
-
-    public boolean isExist(Integer id) {
-        return taskRepository.isExist(id);
     }
 
     public TaskDTO create(String name, File file, Integer docId) {
@@ -40,9 +37,9 @@ public class TaskService {
 
         Integer taskId = taskRepository.save(name, answersObjectKey, docId);
 
-        Optional<TaskEntity> taskById = taskRepository.findById(taskId);
+        Optional<TaskEntity> taskEntity = taskRepository.findById(taskId);
 
-        return mapTask(taskById).get();
+        return mapTask(taskEntity).get();
     }
 
     private Optional<TaskDTO> mapTask(Optional<TaskEntity> taskEntity) {
@@ -55,21 +52,38 @@ public class TaskService {
         TaskDTO taskDTO = new TaskDTO(
                 task.getId(),
                 task.getName(),
-                task.getDocument().getId(),
-                task.getAnswersURL(),
+                task.getDocumentId(),
+                cloudStorageAPI.getObjectURL(task.getAnswersURL()),
                 task.getCreatedAt()
         );
 
         return Optional.of(taskDTO);
     }
 
-    public boolean deleteAllByDocument(Integer id) {
-        return taskRepository.deleteAllByDocument(id);
+    public boolean deleteAllByDocumentId(Integer id) {
+        Set<String> urls = taskRepository.findAllURLByDocumentId(id);
+
+        CompletableFuture<Boolean> areAnswersDeleted = CompletableFuture
+                .supplyAsync(() -> cloudStorageAPI.deleteObjects(urls.toArray(String[]::new)));
+
+        boolean areTasksDeleted = taskRepository.deleteAllByDocument(id);
+
+        try {
+            areAnswersDeleted.get();
+        } catch (InterruptedException | ExecutionException e) {
+            throw new RuntimeException(e);
+        }
+
+        return areTasksDeleted;
     }
 
     public Optional<TaskDTO> findById(Integer id) {
         Optional<TaskEntity> taskEntity = taskRepository.findById(id);
 
         return mapTask(taskEntity);
+    }
+
+    public Set<Integer> findAllByDocumentId(Integer id) {
+        return taskRepository.findAllByDocumentId(id);
     }
 }

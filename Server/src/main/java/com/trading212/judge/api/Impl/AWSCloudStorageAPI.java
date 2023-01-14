@@ -1,6 +1,8 @@
 package com.trading212.judge.api.Impl;
 
 import com.amazonaws.services.s3.AmazonS3;
+import com.amazonaws.services.s3.model.DeleteObjectsRequest;
+import com.amazonaws.services.s3.model.DeleteObjectsRequest.KeyVersion;
 import com.amazonaws.services.s3.model.S3Object;
 import com.trading212.judge.api.CloudStorageAPI;
 import org.springframework.stereotype.Component;
@@ -8,13 +10,16 @@ import org.springframework.stereotype.Component;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Component
 public class AWSCloudStorageAPI implements CloudStorageAPI {
 
     private static final String BUCKET = "trading212-judge-submissions";
     private static final String URL = "https://trading212-judge-submissions.s3.eu-west-3.amazonaws.com/";
-
+                                    // https://trading212-judge-submissions.s3.eu-west-3.amazonaws.com/TaskTest-answers.json
     private final AmazonS3 amazonS3;
 
     public AWSCloudStorageAPI(AmazonS3 amazonS3) {
@@ -41,6 +46,10 @@ public class AWSCloudStorageAPI implements CloudStorageAPI {
 
     @Override
     public File getAnswersObject(String objectKey) {
+        if (objectKey.contains(URL)) {
+            objectKey = objectKey.split(URL)[1];
+        }
+
         S3Object amazonS3Object = amazonS3.getObject(BUCKET, objectKey);
 
         File file = null;
@@ -64,5 +73,23 @@ public class AWSCloudStorageAPI implements CloudStorageAPI {
     @Override
     public String getObjectURL(String objectKey) {
         return URL + objectKey;
+    }
+
+    @Override
+    public boolean deleteObjects(String... objectKeys) {
+        List<KeyVersion> keyVersions = Arrays.stream(objectKeys)
+                .map(KeyVersion::new)
+                .collect(Collectors.toList());
+
+
+        amazonS3.deleteObjects(new DeleteObjectsRequest(BUCKET).withKeys(keyVersions));
+
+        for (String objectKey : objectKeys) {
+            if (!amazonS3.doesObjectExist(BUCKET, objectKey)) {
+                return false;
+            }
+        }
+
+        return true;
     }
 }

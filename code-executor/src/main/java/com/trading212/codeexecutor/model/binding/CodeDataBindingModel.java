@@ -7,6 +7,5 @@ import java.util.List;
 public record CodeDataBindingModel(
         String code,
         LanguageEnum language,
-        List<String> testOutputs,
-        List<String> testInputs) {
+        List<AnswerCases> answers) {
 }

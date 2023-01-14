@@ -3,11 +3,11 @@
 CREATE TABLE `documents`
 (
     `id`         INT PRIMARY KEY AUTO_INCREMENT,
-    `name`       VARCHAR(50)  NOT NULL UNIQUE,
-    `url`        VARCHAR(60)  NOT NULL UNIQUE,
-    `difficulty` ENUM('EASY', 'MEDIUM', 'HARD') NOT NULL,
-    `is_test`    TINYINT(1)   NOT NULL,
-    `created_at` TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP
+    `name`       VARCHAR(50)                     NOT NULL UNIQUE,
+    `url`        VARCHAR(60)                     NOT NULL UNIQUE,
+    `difficulty` ENUM ('EASY', 'MEDIUM', 'HARD') NOT NULL,
+    `is_test`    TINYINT(1)                      NOT NULL,
+    `created_at` TIMESTAMP(3)                    NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TABLE `tasks`
