@@ -1,7 +1,7 @@
 package com.trading212.judge.web.validation.Impl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.trading212.judge.model.dto.submission.TaskAnswersDTO;
+import com.trading212.judge.model.dto.task.TaskAnswersDTO;
 import com.trading212.judge.web.validation.IsJSON;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;

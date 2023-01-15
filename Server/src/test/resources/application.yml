@@ -1,0 +1,40 @@
+spring:
+  datasource:
+    driver-class-name: org.mariadb.jdbc.Driver
+    url: jdbc:mariadb://localhost:4444/trading212_judge
+    username: root
+    password: pass
+  flyway:
+    driver-class-name: org.mariadb.jdbc.Driver
+    url: jdbc:mariadb://localhost:4444
+    user: root
+    password: pass
+    default-schema: trading212_judge
+    locations: classpath:db/migration
+  jackson:
+    serialization:
+      write-dates-as-timestamps: true
+      write-date-timestamps-as-nanoseconds: false
+  servlet:
+    multipart:
+      max-file-size: 5MB
+server:
+  error:
+    include-message: always
+logging:
+  level:
+    org:
+      springframework:
+        jdbc:
+          core:
+            JdbcTemplate:
+              DEBUG
+            StatementCreatorUtils:
+              TRACE
+jwt-secret:
+    some-secret
+aws:
+  credentials:
+    access-key: someAccessKey
+    secret-key: someSecretKey
+    region: someRegion

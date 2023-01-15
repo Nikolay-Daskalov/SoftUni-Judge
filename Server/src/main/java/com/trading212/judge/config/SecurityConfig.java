@@ -40,6 +40,7 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.GET, DocumentController.Routes.BASE).permitAll()
                 .requestMatchers(DocumentController.Routes.BASE + ALL_SUB_ROUTES).fullyAuthenticated()
                 .requestMatchers(TaskController.Routes.BASE + ALL_SUB_ROUTES).fullyAuthenticated()
+                .requestMatchers(CodeExecutionController.Routes.BASE + ALL_SUB_ROUTES).fullyAuthenticated()
                 .anyRequest().permitAll()
                 .and()
                 .addFilterBefore(authenticationFilter, UsernamePasswordAuthenticationFilter.class) // Add Custom filters in the SecurityFilterChain

@@ -5,6 +5,7 @@ import com.trading212.judge.model.dto.submission.CodeResultDTO;
 import com.trading212.judge.service.submission.CodeExecutionService;
 import com.trading212.judge.util.path.ResourcePathUtil;
 import com.trading212.judge.web.exception.InvalidRequestException;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
@@ -20,6 +21,7 @@ import static com.trading212.judge.web.controller.CodeExecutionController.Routes
 
 @RestController
 @RequestMapping(path = Routes.BASE)
+@SecurityRequirement(name = "bearerAuth")
 public class CodeExecutionController {
 
     private final CodeExecutionService codeExecutionService;

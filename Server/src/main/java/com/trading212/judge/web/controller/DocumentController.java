@@ -9,6 +9,7 @@ import com.trading212.judge.service.task.DocumentService;
 import com.trading212.judge.util.path.ResourcePathUtil;
 import com.trading212.judge.web.exception.*;
 import com.trading212.judge.service.task.TaskService;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -47,6 +48,7 @@ public class DocumentController {
         return !documents.documents().isEmpty() ? ResponseEntity.ok(documents) : ResponseEntity.noContent().build();
     }
 
+    @SecurityRequirement(name = "bearerAuth")
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<DocumentDTO> create(@ModelAttribute @Valid DocumentBindingModel documentBindingModel,
                                               BindingResult bindingResult, HttpServletRequest httpServletRequest) {
@@ -80,6 +82,7 @@ public class DocumentController {
                 .body(document);
     }
 
+    @SecurityRequirement(name = "bearerAuth")
     @DeleteMapping(path = Routes.BY_ID)
     @ResponseStatus(code = HttpStatus.NO_CONTENT)
     public void deleteById(@PathVariable Integer id) {
@@ -94,6 +97,7 @@ public class DocumentController {
         }
     }
 
+    @SecurityRequirement(name = "bearerAuth")
     @GetMapping(path = Routes.BY_ID)
     public ResponseEntity<DocumentDTO> findById(@PathVariable Integer id) {
         Optional<DocumentDTO> documentDTO = documentService.findByID(id);
@@ -105,6 +109,7 @@ public class DocumentController {
         return ResponseEntity.ok(documentDTO.get());
     }
 
+    @SecurityRequirement(name = "bearerAuth")
     @GetMapping(path = Routes.FIND_ALL_TASKS_BY_DOCUMENT_ID)
     public ResponseEntity<TaskPageable> findAllTasksSimple(@PathVariable Integer id, @RequestParam(defaultValue = "0") Integer pageNumber) {
         if (id <= 0 || pageNumber < 0) {

@@ -6,6 +6,7 @@ import com.trading212.judge.service.task.DocumentService;
 import com.trading212.judge.service.task.TaskService;
 import com.trading212.judge.util.path.ResourcePathUtil;
 import com.trading212.judge.web.exception.*;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import org.springframework.http.MediaType;
@@ -19,6 +20,7 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping(path = TaskController.Routes.BASE)
+@SecurityRequirement(name = "bearerAuth")
 public class TaskController {
 
     private final TaskService taskService;

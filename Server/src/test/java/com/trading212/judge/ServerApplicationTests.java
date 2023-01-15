@@ -1,4 +1,4 @@
-package com.trading212.Server;
+package com.trading212.judge;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
