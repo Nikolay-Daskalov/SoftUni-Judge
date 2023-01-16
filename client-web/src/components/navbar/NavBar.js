@@ -20,9 +20,14 @@ function NavBar() {
             );
         } else {
             return (
-                <li className="nav-item ms-lg-3 mb-sm-1 mb-lg-0 ms-auto me-auto">
-                    <NavLink className="nav-link active fs-5" to="/users/login">Login</NavLink>
-                </li>
+                <>
+                    <li className="nav-item ms-lg-3 mb-sm-1 mb-lg-0 ms-auto me-auto">
+                        <NavLink className="nav-link active fs-5" to="/users/login">Login</NavLink>
+                    </li>
+                    <li className="nav-item ms-lg-3 mb-sm-1 mb-lg-0 ms-auto me-auto">
+                        <NavLink className="nav-link active fs-5" to="/users/register">Register</NavLink>
+                    </li>
+                </>
             );
         }
     };
