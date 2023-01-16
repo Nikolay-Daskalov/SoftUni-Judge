@@ -1,22 +1,47 @@
 version: '3'
 services:
-    code-executor:
-        image: exe
+    mariadb:
+        image: mariadb:10.10.2
+        expose:
+            - "3306"
+        environment:
+            - MARIADB_ROOT_PASSWORD=pass
+        deploy:
+            restart_policy:
+                condition: on-failure
+                delay: 3s
+                max_attempts: 5
+    server:
+        image: nikolaydaskalov/trading212-judge-server:v1
         ports:
-            - "8088:8081"
+            - "8080:8080"
+        environment:
+            - DB_URL=jdbc:mariadb://mariadb/trading212_judge
+            - FLYWAY_DB_URL=jdbc:mariadb://mariadb
+            - DB_USERNAME=root
+            - DB_PASSWORD=pass
+            - DB_SCHEMA=trading212_judge
+            - JWT_SECRET=top-secret
+        deploy:
+            restart_policy:
+                condition: on-failure
+                delay: 3s
+                max_attempts: 5
+            resources:
+                limits:
+                    cpus: "1"
+                    memory: 500M
+    code-executor:
+        image: nikolaydaskalov/trading212-judge-code-executor:v1
+        expose:
+            - "8081"
         deploy:
             replicas: 3
             restart_policy:
                 condition: on-failure
-#networks:
-#    internet:
-#        driver: bridge
-#    no-internet:
-#        driver: bridge
-#        internal: true
-
-# To start them use:
-#    1. set up networks
-#    2. docker swarm init,
-#    3. docker stack deploy -f {path/to/compose.yml} {stack-name},
-#    4. docker
+                delay: 3s
+                max_attempts: 5
+            resources:
+                limits:
+                    cpus: "1"
+                    memory: 500M

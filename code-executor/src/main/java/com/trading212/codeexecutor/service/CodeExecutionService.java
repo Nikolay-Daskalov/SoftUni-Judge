@@ -88,7 +88,8 @@ public class CodeExecutionService {
     private void deleteClassFile() throws IOException, InterruptedException {
         String tempDir = ProcessService.TEMP_DIR;
 
-        ProcessBuilder deleteProcessBuilder = new ProcessBuilder("bash", "-c", "find . -type f -maxdepth 1  -name \"*.class\" -exec rm {} \\;");
+//        ProcessBuilder deleteProcessBuilder = new ProcessBuilder("bash", "-c", "find . -type f -maxdepth 1  -name \"*.class\" -exec rm {} \\;");
+        ProcessBuilder deleteProcessBuilder = new ProcessBuilder("bash", "-c", "rm *.class");
 
         deleteProcessBuilder.directory(new File(tempDir));
 

@@ -1,5 +1,9 @@
-FROM amazoncorretto:17.0.4
+FROM amazoncorretto:17.0.5
 
-COPY ./target/code-executor-3.0.1.jar app.jar
+MAINTAINER "Nikolay Daskalov"
 
-ENTRYPOINT ["java", "-jar", "app.jar"]
+WORKDIR /code-executor
+
+COPY ./target/code-executor-3.0.1.jar code-executor.jar
+
+ENTRYPOINT ["java", "-jar", "code-executor.jar"]

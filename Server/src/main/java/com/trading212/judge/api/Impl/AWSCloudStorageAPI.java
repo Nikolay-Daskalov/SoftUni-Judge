@@ -77,6 +77,10 @@ public class AWSCloudStorageAPI implements CloudStorageAPI {
 
     @Override
     public boolean deleteObjects(String... objectKeys) {
+        if (objectKeys.length == 0) {
+            return true;
+        }
+
         List<KeyVersion> keyVersions = Arrays.stream(objectKeys)
                 .map(KeyVersion::new)
                 .collect(Collectors.toList());

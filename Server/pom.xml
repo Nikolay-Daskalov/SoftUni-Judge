@@ -9,7 +9,7 @@
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>com.trading212.judge</groupId>
-    <artifactId>Server</artifactId>
+    <artifactId>server</artifactId>
     <name>server</name>
     <description>This is the server for SoftUni Judge demo project.</description>
     <properties>

@@ -15,7 +15,7 @@ import static com.trading212.judge.web.controller.UserController.Routes;
 
 @RestController
 @RequestMapping(path = Routes.BASE)
-public class UserController {
+public class  UserController {
 
     private final UserService userService;
 

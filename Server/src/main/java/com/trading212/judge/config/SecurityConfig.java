@@ -19,10 +19,14 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.AnonymousAuthenticationFilter;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+import org.springframework.security.web.util.matcher.RequestMatcher;
 
 @Configuration
-@EnableWebSecurity(debug = false)
+@EnableWebSecurity
 public class SecurityConfig {
+
+    private static final String ADMIN_ROLE = "ADMIN";
 
     private static final String ALL_SUB_ROUTES = "/**";
 
@@ -34,13 +38,23 @@ public class SecurityConfig {
                 .sessionManagement() // Set so Spring Security will not create session
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and()
-                .authorizeHttpRequests() // Set routes matchers
+                // Set routes matchers
+                .authorizeHttpRequests()
+                // User matches
                 .requestMatchers(UserController.Routes.BASE + UserController.Routes.REGISTER).permitAll()
-                .requestMatchers(CodeExecutionController.Routes.BASE).fullyAuthenticated()
-                .requestMatchers(HttpMethod.GET, DocumentController.Routes.BASE).permitAll()
-                .requestMatchers(DocumentController.Routes.BASE + ALL_SUB_ROUTES).fullyAuthenticated()
-                .requestMatchers(TaskController.Routes.BASE + ALL_SUB_ROUTES).fullyAuthenticated()
+                // Code execution matches
+                .requestMatchers(HttpMethod.POST, CodeExecutionController.Routes.BASE).fullyAuthenticated()
                 .requestMatchers(CodeExecutionController.Routes.BASE + ALL_SUB_ROUTES).fullyAuthenticated()
+                // Documents matches
+                .requestMatchers(HttpMethod.GET, DocumentController.Routes.BASE).permitAll()
+                .requestMatchers(HttpMethod.POST, DocumentController.Routes.BASE).hasRole(ADMIN_ROLE)
+                .requestMatchers(HttpMethod.DELETE, DocumentController.Routes.BY_ID).hasRole(ADMIN_ROLE)
+                .requestMatchers(DocumentController.Routes.BASE + ALL_SUB_ROUTES).fullyAuthenticated()
+                // Tasks matches
+                .requestMatchers(HttpMethod.POST, TaskController.Routes.BASE).hasRole(ADMIN_ROLE)
+                .requestMatchers(HttpMethod.GET, TaskController.Routes.BY_ID).fullyAuthenticated()
+                .requestMatchers(TaskController.Routes.BASE + ALL_SUB_ROUTES).fullyAuthenticated()
+                // other requests
                 .anyRequest().permitAll()
                 .and()
                 .addFilterBefore(authenticationFilter, UsernamePasswordAuthenticationFilter.class) // Add Custom filters in the SecurityFilterChain
